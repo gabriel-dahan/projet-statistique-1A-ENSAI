@@ -1,0 +1,1 @@
+Rscript -e "quarto::quarto_render('main.qmd')"
