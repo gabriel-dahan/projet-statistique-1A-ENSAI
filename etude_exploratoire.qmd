@@ -1,0 +1,60 @@
+---
+title: "etude_exploratoire"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+bdd <- readRDS('stu_qqq.rds')
+
+clean_bdd <- bdd %>% select('IC171Q01JA','IC171Q02JA','IC171Q04JA','IC170Q01JA','IC170Q04JA','IC177Q02JA','IC177Q03JA','IC178Q01JA','IC178Q02JA','ST294Q02JA','IC170Q06JA','IC171Q05JA','IC171Q06JA','IC173Q02JA','IC174Q10JA','IC175Q03JA','IC177Q07JA','ST291Q08JA','ST291Q09JA','ST250Q03JA','ESCS','HISEI','PAREDINT','HOMEPOS','ST250Q02JA','ST250Q05JA','ST251Q06JA','ST251Q07JA','ST256Q10JA','ST005Q01JA')
+
+var_digital_res_1 <- clean_bdd$IC174Q10JA
+
+var_digital_res_1 <- case_match(var_digital_res_1,
+    1 ~ "Jamais",
+    2 ~ "1/annee",
+    3 ~ "1/mois",
+    4 ~ "1/semaine",
+    5 ~ "+1/jour",
+    .default = as.character(var_digital_res_1)
+  )
+```
+
+```{r}
+str(var_digital_res_1)
+summary(var_digital_res_1)
+```
+
+```{r}
+t <- table(var_digital_res_1)
+freq_digital_res_1 <- round(prop.table(t) * 100, 1)
+freq_digital_res_1
+
+df_plot <- as.data.frame(freq_digital_res_1)
+
+colnames(df_plot) <- c("Note", "Pourcentage")
+
+ggplot(df_plot, aes(x = Note, y = Pourcentage, fill = Note)) +
+  geom_col(show.legend = FALSE, width = 0.7, color = "white", size = 0.5) +
+  
+  geom_text(aes(label = paste0(Pourcentage, "%")), 
+            position = position_stack(vjust = 0.5), 
+            color = "white", 
+            fontface = "bold",
+            size = 5) +
+  
+  labs(
+    title = "Répartition de la fréquence d'utilisation jeux digitaux éducatifs",
+    subtitle = "Fréquence relative exprimée en pourcentage",
+    x = "Catégorie de réponse",
+    y = "Pourcentage (%)",
+    caption = "Source : PISA 2022"
+  ) +
+  
+  theme_minimal()
+```

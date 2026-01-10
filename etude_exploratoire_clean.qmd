@@ -1,0 +1,175 @@
+---
+title: "Étude exploratoire : Technologie et performances éducatives"
+author: "Groupe 1"
+format: 
+  pdf:
+    toc: false
+    code-fold: show
+    theme: cosmo
+editor: visual
+echo: false
+---
+
+## I. Références Bibliographiques
+
+### 1. Référence 1
+
+OCDE (2015), Connectés pour apprendre : les élèves et la technologie.
+
+On a choisi ce rapport est le point de départ indispensable car il analyse l’impact des investissements technologiques à l’échelle mondiale. L’étude montre que malgré la généralisation des outils numériques, les résultats en compréhension de l’écrit et en mathématiques n’ont pas suivi la même courbe de progression. Donc si l’absence totale de technologie est un handicap, une sur-utilisation devient néfaste.
+
+Le point le plus intéressant pour notre projet est l’identification d’une relation non linéaire. Les élèves affichant les meilleures performances sont ceux qui utilisent l’ordinateur de manière modérée (une à deux fois par semaine). Dès que l’usage devient quotidien ou intensif, on observe une chute des scores, souvent liée à une perte de concentration ou à un usage moins encadré.
+
+Ça nous donne une hypothèse de travail forte : il existerait un “seuil” numérique. Donc nous ne chercherons pas une simple corrélation linéaire, mais nous essaierons de modéliser cet effet de seuil en observant si les scores de performance baissent chez les gros utilisateurs.
+
+### 2. Référence 2
+
+Escueta, M., et al. (2020), Upgrading Education with Technology, Journal of Economic Literature.
+
+Cette méta-analyse permet de comprendre que la technologie est trop vaste. Les auteurs distinguent trois types d’interventions : l’accès au matériel, les logiciels d’apprentissage (CAL), et les outils de communication (on pourra d'ailleurs essayer de calquer ces 3 type d’interventions dans notre étude). Ils en concluent que donner un ordinateur ou une tablette à un élève sans programme spécifique n’améliore quasiment jamais ses notes. Cela peut même être contre-productif si l’outil est utilisé pour les réseaux sociaux ou les jeux.
+
+En revanche, les logiciels adaptatifs (qui ajustent la difficulté des exercices de maths en fonction des réponses de l’élève) montrent des résultats très positifs. La technologie est donc performante lorsqu’elle permet une personnalisation de l’enseignement que L'enseignant ne pourrait pas faire seul avec 30 élèves. Cette lecture nous oriente vers une sélection précise de nos variables. Si les données le permettent, nous devrons distinguer l’usage “passif” (recherche internet) de l’usage “actif/pédagogique” (logiciels spécialisés). Cela nous aidera à expliquer pourquoi certains élèves équipés réussissent mieux que d’autres : ce n’est pas l’outil qui compte, mais le logiciel utilisé.
+
+### 3. Référence 3
+
+Attewell, P. (2001), The First and Second Digital Divides, Sociology of Education.
+
+L’intérêt de cet article est d’apporter une dimension sociologique indispensable à notre projet. Attewell explique qu’une fois que l’accès au matériel est généralisé (fin de la première fracture), une “seconde fracture” apparaît dans les usages. Il observe que les élèves issus de familles favorisées utilisent majoritairement l’ordinateur pour des activités à “haut profit éducatif” (programmation, rédaction, recherches complexes).
+
+À l’inverse, dans les milieux moins favorisés, ils utilisent l’ordinateur pour le divertissement (vidéos, jeux). Ainsi, à équipement égal, la technologie peut paradoxalement augmenter les écarts de réussite au lieu de les réduire. L’ordinateur devient un amplificateur des habitudes culturelles déjà présentes dans le foyer.
+
+Pour notre analyse, nous devons tester l’interaction entre le milieu social et l’usage du numérique.
+
+Au terme de ces lectures, notre vision du sujet a évolué. Nous ne considérons plus la technologie comme une variable binaire (on y a accès ou pas), mais comme une variable dont l’effet dépend de deux facteurs : la fréquence et la nature de l’usage.
+
+Pour notre projet statistique, nous pouvons déjà penser à quelques éléments à vérifier :
+
+L’effet de seuil : Tester si la performance diminue au-delà d’une certaine durée de connexion. Segmenter par type d’usage : Comparer l’impact des usages scolaires vs usages de loisirs sur les scores de réussite. Analyser l’interaction sociale : Vérifier si l’effet de l’ordinateur sur la note change selon l’indice socio-économique de l’élève.
+
+L’objectif final est de démontrer que la performance éducative liée à la technologie est une question d’équilibre et de contexte social plutôt que de simple équipement matériel.
+
+------------------------------------------------------------------------
+
+## II. Sélection des Variables et Axes d'Analyse
+
+Pour tester ces hypothèses, nous avons sélectionné trois axes d'analyse basés sur les variables du questionnaire PISA :
+
+### 1. Analyse de l'effet de seuil
+
+Cette piste examine si un usage modéré est bénéfique alors qu'un usage intensif devient contre-productif.
+
+Fréquence globale : Analyse de l'utilisation de l'ordinateur et du smartphone, à l'école et à la maison (IC170Q01JA à IC171Q04JA).
+
+Temps de loisirs : Évaluation de la durée consacrée aux jeux vidéo, aux réseaux sociaux et à la navigation plaisir (IC177Q02JA à IC178Q02JA).
+
+Arbitrage temporel : Comparaison entre le temps d'écran et l'effort scolaire investi, mesuré par la fréquence des devoirs et de l'étude personnelle (ST294Q02JA).
+
+### 2. Segmentation par type d'usage
+
+Ici, l'analyse porte sur la distinction entre la consommation passive et la création active, ainsi qu'entre les usages récréatifs et éducatifs.
+
+Apprentissage assisté : Fréquence d'utilisation de logiciels éducatifs (IC170Q06JA, IC171Q05JA) et réception de feedbacks automatiques (IC175Q03JA).
+
+Spécificité Mathématique : Utilisation de ressources numériques durant les cours de mathématiques (IC173Q02JA) et recours à des jeux d'apprentissage (IC174Q10JA).
+
+Usage actif et Confiance : Mesure du temps passé à créer du contenu ou à programmer (IC177Q07JA) et évaluation de l'auto-efficacité de l'élève face à des tâches mathématiques numériques (ST291Q08JA, ST291Q09JA).
+
+### 3. Influence des technologies sur l’indice socio-économique de l’élève
+
+Cette piste explore comment le capital culturel et économique influence la rentabilité scolaire du numérique.
+
+Statut socio-économique : Utilisation des indices synthétiques (ESCS) et du niveau d'études ou professionnel des parents (HISEI, PAREDINT, ST005Q01JA).
+
+Ressources au foyer : Disponibilité d'un ordinateur pour travailler, d'une connexion Wi-Fi (ST250Q02JA, ST250Q05JA) et de logiciels éducatifs (ST250Q03JA).
+
+Capital culturel : Présence d'objets de médiation culturelle (livres scolaires, œuvres d'art, instruments de musique) pour évaluer le soutien éducatif familial (ST251Q06JA à ST256Q10JA).
+
+------------------------------------------------------------------------
+
+## III. Analyse de la Variable : Jeux Digitaux Éducatifs
+
+Nous nous concentrons ici sur la variable **IC174Q10JA** : *"Fréquence d'utilisation des ressources numériques pour jouer à des jeux d'apprentissage digitaux"*
+
+### 1. Etude statistique
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+
+bdd <- readRDS('stu_qqq.rds')
+
+clean_bdd <- bdd %>% select(
+  'IC171Q01JA','IC171Q02JA','IC171Q04JA','IC170Q01JA','IC170Q04JA',
+  'IC177Q02JA','IC177Q03JA','IC178Q01JA','IC178Q02JA','ST294Q02JA',
+  'IC170Q06JA','IC171Q05JA','IC171Q06JA','IC173Q02JA','IC174Q10JA',
+  'IC175Q03JA','IC177Q07JA','ST291Q08JA','ST291Q09JA','ST250Q03JA',
+  'ESCS','HISEI','PAREDINT','HOMEPOS','ST250Q02JA','ST250Q05JA',
+  'ST251Q06JA','ST251Q07JA','ST256Q10JA','ST005Q01JA'
+)
+
+IC174Q10JA <- case_match(clean_bdd$IC174Q10JA,
+    1 ~ "Jamais",
+    2 ~ "1/annee",
+    3 ~ "1/mois",
+    4 ~ "1/semaine",
+    5 ~ "+1/jour",
+    .default = as.character(clean_bdd$IC174Q10JA)
+  )
+
+IC174Q10JA <- factor(IC174Q10JA, 
+                            levels = c("Jamais", 
+                                       "1/annee", 
+                                       "1/mois", 
+                                       "1/semaine", 
+                                       "+1/jour"))
+```
+
+Après avoir chargé et élagué la base, nous avons créé une table sur la variable IC174Q10JA, indiquant l'effectif d'étudiants correspondant à chaque modalité :
+
+```{r}
+t <- table(IC174Q10JA)
+t
+```
+
+Nous avons ensuite traduit cela en fréquences :
+
+```{r}
+freq_digital_res_1 <- round(prop.table(t) * 100, 1)
+freq_digital_res_1
+```
+
+### 2. Visualisation des données
+
+```{r, }
+df_plot <- as.data.frame(freq_digital_res_1)
+colnames(df_plot) <- c("Frequence", "Pourcentage")
+
+ggplot(df_plot, aes(x = Frequence, y = Pourcentage, fill = Frequence)) +
+  geom_col(show.legend = FALSE, width = 0.7, color = "white", linewidth = 0.5) +
+  
+  geom_text(aes(label = paste0(Pourcentage, "%")), 
+            position = position_stack(vjust = 0.5), 
+            color = "white", 
+            fontface = "bold",
+            size = 5) +
+  
+  labs(
+    title = "Répartition de la fréquence d'utilisation des jeux 
+      digitaux éducatifs",
+    subtitle = "Analyse de la variable IC174Q10JA (Source : PISA 2022)",
+    x = "Fréquence d'utilisation",
+    y = "Pourcentage (%)",
+    caption = "Base d'étude : PISA 2022 - Questionnaire Élève"
+  ) +
+  
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.title = element_text(face = "italic")
+  )
+```
+
+Nous pouvons voir qu'un tiers des étudiants disent n'avoir jamais joué à des jeux digitaux éducatifs, et qu'il y en a réalité une faible proportion qui jouent à ces jeux fréquemment (23,2% de pourcentage cumulé entre 1/semaine et +1/jour).
+
+Ces résultats sont à mettre en parallèle avec des variables traduisant la réussite scolaire, pour voir si l'utilisation des jeux digitaux étucatifs peut être corrélée avec une augmentation du niveau scolaire.
+
+Durant notre note exploratoire, nous avons dû faire l'étude d'une seule variable, mais il serait intéressant de croiser l'étude de plusieurs variables afin d'en tirer plus de conclusions.
