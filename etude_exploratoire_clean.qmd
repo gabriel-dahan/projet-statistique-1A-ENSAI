@@ -92,7 +92,7 @@ Nous nous concentrons ici sur la variable **IC174Q10JA** : *"Fréquence d'utilis
 
 ### 1. Etude statistique
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r}
 library(tidyverse)
 
 bdd <- readRDS('stu_qqq.rds')
@@ -139,7 +139,7 @@ freq_digital_res_1
 
 ### 2. Visualisation des données
 
-```{r, }
+```{r}
 df_plot <- as.data.frame(freq_digital_res_1)
 colnames(df_plot) <- c("Frequence", "Pourcentage")
 
