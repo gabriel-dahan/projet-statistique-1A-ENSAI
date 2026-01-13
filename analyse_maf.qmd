@@ -1,5 +1,5 @@
 ---
-title: "Étude exploratoire : Technologie et performances éducatives"
+title: "Méthode d'analyse factorielle"
 author: "Groupe 1"
 format: 
   pdf:
@@ -9,23 +9,90 @@ format:
 editor: visual
 echo: false
 ---
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+library(FactoMineR)
+library(factoextra) 
+library(dplyr)      
+library(GGally)
+library(missMDA)
 ```
 
-You can add options to executable code like this
-
 ```{r}
-#| echo: false
-2 * 2
+bdd <- readRDS('stu_qqq.rds')
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+clean_bdd <- bdd %>% select(
+  'IC171Q01JA','IC171Q02JA','IC171Q04JA','IC170Q01JA','IC170Q04JA',
+  'IC177Q02JA','IC177Q03JA','IC178Q01JA','IC178Q02JA','ST294Q02JA',
+  'IC170Q06JA','IC171Q05JA','IC171Q06JA','IC173Q02JA','IC174Q10JA',
+  'IC175Q03JA','IC177Q07JA','ST291Q08JA','ST291Q09JA','ST250Q03JA',
+  'ESCS','HISEI','PAREDINT','HOMEPOS','ST250Q02JA','ST250Q05JA',
+  'ST251Q06JA','ST251Q07JA','ST256Q10JA','ST005Q01JA'
+
+)
+```
+```{r}
+clean_bdd
+```
+
+```{r}
+summary(clean_bdd)
+```
+
+```{r}
+
+bdd_for_acp1 <- clean_bdd %>% select('IC171Q01JA','IC171Q02JA','IC171Q04JA','IC170Q01JA','IC170Q04JA',
+  'IC177Q02JA','IC177Q03JA','IC178Q01JA','IC178Q02JA','ST294Q02JA',
+  'IC170Q06JA','IC171Q05JA','IC171Q06JA','IC173Q02JA','IC174Q10JA',
+  'IC175Q03JA','IC177Q07JA')
+
+bdd_for_acpn1 <- scale(bdd_for_acp1)
+```
+
+```{r}
+bdd_acpn1 <- PCA(bdd_for_acpn1, graph = FALSE)
+print(summary(bdd_acpn1))
+```
+
+```{r}
+print(get_eigenvalue(bdd_acpn1))
+```
+pour l acp norme il y a des NA dans la bdd dcp faudra utilise missMDA et imputepca pour etre plus precis mais g pas le temps il est 12h42
+```{r}
+bdd_acpn1 <- PCA(bdd_for_acpn1)
+print(summary(bdd_acpn1))
+```
+
+le truc qui suit c de la merde faut pas cala
+```{r}
+t<-table(bdd_for_acpn1)
+
+df_plot <- as.data.frame(t)
+colnames(df_plot) <- c("Frequence", "Pourcentage")
+
+ggplot(df_plot, aes(x = Frequence, y = Pourcentage, fill = Frequence)) +
+  geom_col(show.legend = FALSE, width = 0.7, color = "white", linewidth = 0.5) +
+  
+  geom_text(aes(label = paste0(Pourcentage, "%")), 
+            position = position_stack(vjust = 0.5), 
+            color = "white", 
+            fontface = "bold",
+            size = 5) +
+  
+  labs(
+    title = "Répartition de la fréquence d'utilisation des jeux 
+      digitaux éducatifs",
+    subtitle = "Analyse de la variable IC174Q10JA (Source : PISA 2022)",
+    x = "Fréquence d'utilisation",
+    y = "Pourcentage (%)",
+    caption = "Base d'étude : PISA 2022 - Questionnaire Élève"
+  ) +
+  
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.title = element_text(face = "italic")
+  )
+```
+```
