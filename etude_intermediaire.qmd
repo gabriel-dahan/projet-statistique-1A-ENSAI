@@ -57,7 +57,7 @@ On garde une multitude de variables que l'on renomme :
 
     -   ST250Q05JA : internet_access_available
 
-    -   ADMINMODE : response_medium (biais qu'il peut y avoir sur le plan socio-économique lorsque quelqu'un utilise du papier plutôt qu'un ordinateur pour répondre, et ses prédispositions à utiliser ou un un ordinateur)
+    -   ADMINMODE : response_medium (biais qu'il peut y avoir sur le plan socio-économique lorsque quelqu'un utilise du papier plutôt qu'un ordinateur pour répondre, et ses prédispositions à utiliser ou non un ordinateur)
 
     -   ST256Q10JA : book_reading_for_school (biais qu'il peut y avoir pour quelqu'un utilisant plusieurs méthodes d'apprentissage)
 
@@ -77,7 +77,7 @@ On garde une multitude de variables que l'on renomme :
 
         -   ST326Q05JA : digital_resources_usage_for_leisure_outside_school_by_day
 
-        -   ST326Q06JA -\> digital_resources_usage_for_leisure_on_weekends
+        -   ST326Q06JA : digital_resources_usage_for_leisure_on_weekends
 
         -   ST253Q01JA : nb_digital_devices_at_home
 
