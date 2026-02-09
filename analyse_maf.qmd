@@ -9,6 +9,7 @@ format:
 editor: visual
 echo: false
 ---
+
 ```{r}
 library(FactoMineR)
 library(factoextra) 
@@ -32,6 +33,7 @@ clean_bdd <- bdd %>% select(
 
 )
 ```
+
 ```{r}
 clean_bdd
 ```
@@ -58,13 +60,16 @@ print(summary(bdd_acpn1))
 ```{r}
 print(get_eigenvalue(bdd_acpn1))
 ```
+
 pour l acp norme il y a des NA dans la bdd dcp faudra utilise missMDA et imputepca pour etre plus precis mais g pas le temps il est 12h42
+
 ```{r}
 bdd_acpn1 <- PCA(bdd_for_acpn1)
 print(summary(bdd_acpn1))
 ```
 
 le truc qui suit c de la merde faut pas cala
+
 ```{r}
 t<-table(bdd_for_acpn1)
 
@@ -94,5 +99,4 @@ ggplot(df_plot, aes(x = Frequence, y = Pourcentage, fill = Frequence)) +
     plot.title = element_text(face = "bold", size = 14),
     axis.title = element_text(face = "italic")
   )
-```
 ```
