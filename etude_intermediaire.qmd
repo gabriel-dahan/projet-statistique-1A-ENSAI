@@ -1,0 +1,158 @@
+---
+title: "Étude intermédiaire"
+author: "Groupe 1"
+format: 
+  pdf:
+    toc: false
+    code-fold: show
+    theme: cosmo
+editor: visual
+echo: false
+---
+
+Après le 1er entretien oral, nous avons appris plusieurs choses :
+
+-   Premièrement, nous expliquerons plus en profondeur le lien entre les différentes variables, mais également le type de variables utilisées (intérêt, contrôle, transitif).
+
+-   Nous essayons d'améliorer la clareté des graphiques afin de transmettre au mieux un message ou une analyse spécifique plutôt que de juste représenter le lien entre deux variables ou plus.
+
+Nouvelles variables étudiées :
+
+-   CNT, CNTRYID : Le pays (variable de contrôle), ainsi que le nombre de réponses par pays (intervalle de confiance, stat inférentielle);
+-   ST003D03T : Age : permet de savoir si l'utilisation de jeux éducatifs impacte les performances en fonction du niveau scolaire - effet de seuil possible avec l'âge
+
+Variables d'intérêt :
+
+-   Performances :
+
+    -    ST127Q01TA : Redoublement ?
+
+    -   Resources digitales : ST326Q01JA, ST322Q04JA
+
+Partie préliminaire : accès aux technologies - impact des variables socio-économiques et géographique sur cet aspect.
+
+Partie 1.
+
+A. L'utilisation des technologies sur le performances scolaires a un impact positif
+
+B. Pleins de facteurs qui influencent néamoins cet impact.
+
+i. l'Age/le niveau scolaire
+
+ii. l'utilisation qui est faite des technologies
+
+Partie 2. Un effet de seuil ?
+
+A. Faire variable qui est un score de performance scolaire (réussir a quantifier la performance scolaire avec plusieurs variables).
+
+B. Pouvoir tracer une courbe des performances scolaires en fonction de la fréquence d'utilisation d'outils numériques. ==\> Quand on conditionne ça par rapport à d'autres variables en fonction de l'age, du niveau scolaire, ... les courbes ont des tendances différentes.
+
+Après la première étude exploratoire faite dans `etude_exploratoire_clean.qmd`, nous nous appliquons ici à effectuer tous les traitements de base du dataframe afin d'en sélectionner une partie pertinente à notre étude de l'impact des technologies sur les performances éducatives.
+
+Une fois cela fait, nous nous pencherons sur une ébauche de plan relatif à notre étude.
+
+1.  **Librairies et téléchargement de la base.**
+
+```{r, echo = F}
+library(tidyverse)
+```
+
+Téléchargement de la base `./stu_qqq.rds` :
+
+```{r}
+responses_raw <- readRDS('./stu_qqq.rds')
+```
+
+2.  **Elagage et modification du nom des variables.**
+
+On garde une multitude de variables que l'on renomme :
+
+-   Variables de contrôle (age, sexe, position socio-économique et géographique, resources disponibles) :
+
+    -   CNT -\> country
+
+    -   ST003D03T -\> birth_year
+
+    -   ST004D01T -\> genre
+
+    -   PAREDINT -\> index_highest_parental_education
+
+    -   HISEI -\> index_highest_parental_occupation_status
+
+    -   ESCS -\> index_socioeconomic_status
+
+    -   ST250Q02JA -\> computer_for_work_available
+
+    -   ST250Q03JA -\> educational_apps_available
+
+    -   ST250Q05JA -\> internet_access_available
+
+    -   ADMINMODE -\> response_medium (biais qu'il peut y avoir sur le plan socio-économique lorsque quelqu'un utilise du papier plutôt qu'un ordinateur pour répondre, et ses prédispositions à utiliser ou un un ordinateur)
+
+    -   ST256Q10JA -\> book_reading_for_school (biais qu'il peut y avoir pour quelqu'un utilisant plusieurs méthodes d'apprentissage)
+
+    -   STRATUM -\> region_and_schools (pour une étude de cas sur la France, en comparant les résultats obtenus pour un Lycée GT et un Lycée Pro par ex.).
+
+-   Variables d'intérêt (technologies et leurs utilisations, performances éducatives) :
+
+    -   Technologies :
+
+        -   ST326Q01JA -\> digital_resources_usage_for_learning_at_school_by_day
+
+        -   ST326Q02JA -\> digital_resources_usage_for_learning_outside_school_by_day
+
+        -   ST326Q03JA -\> digital_resources_usage_for_learning_on_weekends
+
+        -   ST326Q04JA -\> digital_resources_usage_for_leisure_at_school_by_day
+
+        -   ST326Q05JA -\> digital_resources_usage_for_leisure_outside_school_by_day
+
+        -   ST326Q06JA -\> digital_resources_usage_for_leisure_on_weekends
+
+        -   ST253Q01JA -\> nb_digital_devices_at_home
+
+        -   IC174Q10JA -\> digital_games_usage_for_learning
+
+    -   Performances éducatives :
+
+        -   REPEAT -\> repeated_a_year
+
+        -   PV1MATH -\> pv_math
+
+        -   PV1READ -\> pv_reading_comprehension
+
+        -   PV1SCIE -\> pv_science
+
+Faisons alors un élagage du dataframe avec ces nouvelles variables :
+
+```{r}
+responses <- responses_raw |> 
+  select(
+    country = CNT,
+    birth_year = ST003D03T,
+    genre = ST004D01T,
+    index_highest_parental_education = PAREDINT,
+    index_highest_parental_occupation_status = HISEI,
+    index_socioeconomic_status = ESCS,
+    computer_for_work_available = ST250Q02JA,
+    educational_apps_available = ST250Q03JA,
+    internet_access_available = ST250Q05JA,
+    response_medium = ADMINMODE,
+    book_reading_for_school = ST256Q10JA,
+    region_and_schools = STRATUM,
+    
+    digital_resources_usage_for_learning_at_school_by_day = ST326Q01JA,
+    digital_resources_usage_for_learning_outside_school_by_day = ST326Q02JA,
+    digital_resources_usage_for_learning_on_weekends = ST326Q03JA,
+    digital_resources_usage_for_leisure_at_school_by_day = ST326Q04JA,
+    digital_resources_usage_for_leisure_outside_school_by_day = ST326Q05JA,
+    digital_resources_usage_for_leisure_on_weekends = ST326Q06JA,
+    nb_digital_devices_at_home = ST253Q01JA,
+    digital_games_usage_for_learning = IC174Q10JA,
+    
+    repeated_a_year = REPEAT,
+    pv_math = PV1MATH,
+    pv_reading_comprehension = PV1READ,
+    pv_science = PV1SCIE
+  )
+```
