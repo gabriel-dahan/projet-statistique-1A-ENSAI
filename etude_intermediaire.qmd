@@ -129,20 +129,50 @@ responses <- responses_raw |>
 
 ### Partie II: Ebauche de plan
 
-Partie préliminaire : accès aux technologies - impact des variables socio-économiques et géographique sur cet aspect.
+### Introduction
 
-Partie 1.
+*Présentation du sujet :* L'objectif de cette étude est d'analyser la relation complexe entre l'accès aux technologies numériques et la performance scolaire des élèves (étude PISA 2022). Nous chercherons à dépasser la simple analyse de corrélation pour identifier d'éventuels effets de seuil et l'influence des types d'usage.
 
-A. L'utilisation des technologies sur le performances scolaires a un impact positif
+### Partie Préliminaire : État des lieux de la fracture numérique
 
-B. Pleins de facteurs qui influencent néamoins cet impact.
+*Objectif :* Avant de lier technologie et performance, il est nécessaire de comprendre comment l'accès aux outils est distribué.
 
-i. l'Age/le niveau scolaire
+#### A. Disparités d'équipement et d'accès
 
-ii. l'utilisation qui est faite des technologies
+Analyse descriptive de la disponibilité des outils numériques (ordinateurs, tablettes, internet) au domicile des élèves. Comparaison entre les pays ou les zones géographiques.
 
-Partie 2. Un effet de seuil ?
+#### B. Le poids des déterminants socio-économiques
 
-A. Faire variable qui est un score de performance scolaire (réussir a quantifier la performance scolaire avec plusieurs variables).
+Étude de l'influence de l'indice de statut économique, social et culturel (ESCS) et de la localisation sur l'utilisation et l'accès à ces équipements. La fracture numérique est-elle résorbée ou persiste-t-elle sous de nouvelles formes ?
 
-B. Pouvoir tracer une courbe des performances scolaires en fonction de la fréquence d'utilisation d'outils numériques. ==\> Quand on conditionne ça par rapport à d'autres variables en fonction de l'age, du niveau scolaire, ... les courbes ont des tendances différentes.
+### Partie 1 : L'ambivalence du lien entre numérique et réussite
+
+*Objectif :* Tester l'hypothèse commune selon laquelle l'accès au numérique favorise la réussite.
+
+#### A. L'apport potentiel : Corrélation globale et densité d'usage
+
+Analyse bivariée entre le temps passé sur les écrans et les résultats scolaires. Observe-t-on une corrélation positive, négative ou nulle sur l'ensemble de la population ?
+
+#### B. Les facteurs modérateurs de la performance
+
+L'impact du numérique n'est pas uniforme. Cette sous-partie examine comment la relation change selon :
+
+1.  L'âge et le niveau scolaire.
+
+2.  La nature de l'usage (usage pédagogique, usage récréatif).
+
+### Partie 2 : Au-delà de la linéarité : La recherche d'un "dosage" optimal
+
+*Objectif :* Affiner le modèle en recherchant des effets non-linéaires (effet de seuil).
+
+#### A. Méthodologie : Construction d'un indicateur multidimensionnel
+
+Justification et création d'un score de performance global (synthèse des scores Mathématiques, Lecture et Sciences) pour obtenir une mesure robuste de la réussite scolaire.
+
+#### B. L'existence d'un seuil au delà duquel les technologies sont contre-productives
+
+Analyse graphique et statistique pour vérifier l'existence d'un seuil de saturation : à partir de quel volume d'heures l'utilisation des outils numériques devient-elle contre-productive ? Mise en évidence des tendances conditionnelles (par niveau scolaire).
+
+### Conclusion
+
+Synthèse des résultats : confirmation ou infirmation de l'effet de seuil. Recommandations sur l'usage raisonné du numérique basées sur les données analysées.
