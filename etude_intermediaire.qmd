@@ -288,64 +288,48 @@ ggplot(trend_data, aes(x = digital_resources_usage_for_learning_at_school_by_day
   labs(title = "Tendance lissée de la performance")
 ```
 ```{r}
-max_scale <- max(df_final$digital_resources_usage_for_learning_at_school_by_day, na.rm = TRUE)
+df_graphique <- df_final 
 
-df_final <- df_final %>%
-  mutate(digital_games_usage_for_learning = case_when(
+df_graphique <- df_graphique %>%
+  mutate(
+    digital_games_usage_for_learning = case_when(
       !is.na(digital_games_usage_for_learning) ~ 
-        1 + (digital_games_usage_for_learning - 1) * (max_scale - 1) / (5 - 1),
-      TRUE ~ NA_real_))
+        1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1),
+      TRUE ~ NA_real_
+    )
+  )
 
-donnees_comparaison <- df_final %>%
-  select(mean_pv,
+donnees_comparaison <- df_graphique %>%
+  select(
+    mean_pv,
     digital_games_usage_for_learning, 
     digital_resources_usage_for_learning_at_school_by_day,
     digital_resources_usage_for_learning_on_weekends, 
     digital_resources_usage_for_learning_outside_school_by_day 
   ) %>%
   pivot_longer(
-    cols = -mean_pv,             
-    names_to = "Activity Type",  
-    values_to = "Frequence"      
+    cols = -mean_pv, 
+    names_to = "Type_Activite", 
+    values_to = "Frequence"
   ) %>%
-  
-  filter(!is.na(Frequence))%>% 
-  filter(!is.na(mean_pv)) 
+  filter(!is.na(Frequence), !is.na(mean_pv))
 
 synthese_graphique <- donnees_comparaison %>%
   group_by(Type_Activite, Frequence) %>%
-  summarise(
-    Note_Moyenne = mean(mean_pv, na.rm = TRUE),
-    .groups = "drop"
-  )
+  summarise(Note_Moyenne = mean(mean_pv, na.rm = TRUE), .groups = "drop")
 
-# 6. Tracer le graphique superposé
-ggplot(synthese_graphique, aes(x = as.factor(Frequence), 
-                               y = Note_Moyenne, 
-                               color = Type_Activite,   # Une couleur par activité
-                               group = Type_Activite)) + # Relier les points par activité
-  
-  # Ligne de tendance
+ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Type_Activite, group = Type_Activite)) +
   geom_line(size = 1.2) +
-  
-  # Points pour marquer les paliers
   geom_point(size = 3) +
-  
-  # Esthétique
   theme_minimal() +
-  scale_color_brewer(palette = "Set1") + # Palette de couleurs contrastées
-  
-  # Textes et Titres
+  scale_color_brewer(palette = "Set1") +
+  scale_x_continuous(breaks = 1:9) + 
   labs(
-    title = "Comparaison de l'impact des écrans sur la performance",
-    subtitle = "Permet de voir quelle activité fait baisser la note le plus vite",
-    x = "Fréquence d'utilisation (1 = Jamais -> 5 = Tous les jours)",
-    y = "Score Moyen PISA (pv_mean)",
-    color = "Type d'Activité"
-  ) +
-  
-  # Placer la légende en bas pour laisser de la place au graphique
-  theme(legend.position = "bottom")
+    title = "Effet de l'utilisation de la technologie sur la performance scolaire",
+    x = "Intensité d'utilisation (1 = Min, 9 = Max)",
+    y = "Score Moyen PISA",
+    color = "Activité"
+  )
 ```
 
 
