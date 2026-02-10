@@ -176,3 +176,84 @@ Analyse graphique et statistique pour vérifier l'existence d'un seuil de satura
 ### Conclusion
 
 Synthèse des résultats : confirmation ou infirmation de l'effet de seuil. Recommandations sur l'usage raisonné du numérique basées sur les données analysées.
+
+```{r}
+school_perf_df <- responses %>% select(pv_math,
+                                      pv_reading_comprehension,
+                                      pv_science)
+
+summary(school_perf_df)
+```
+```{r}
+school_perf_df$mean_pv <- (school_perf_df$pv_math +
+                        school_perf_df$pv_reading_comprehension +
+                        school_perf_df$pv_science)/3
+```
+
+```{r}
+digital_utilisation_df <- responses %>% select(digital_resources_usage_for_learning_at_school_by_day,
+                                                digital_resources_usage_for_learning_on_weekends,
+                                                digital_resources_usage_for_learning_outside_school_by_day,
+                                                digital_games_usage_for_learning)
+```
+
+```{r}
+digital_utilisation_df <- digital_utilisation_df %>%
+  mutate(mean_utilisation = rowMeans(select(., 
+      digital_resources_usage_for_learning_at_school_by_day,
+      digital_resources_usage_for_learning_on_weekends,
+      digital_resources_usage_for_learning_outside_school_by_day,
+      digital_games_usage_for_learning
+    ), na.rm = TRUE))
+```
+
+```{r}
+df_scatter_plot <- digital_utilisation_df %>% select(mean_utilisation)
+df_scatter_plot$mean_pv <- school_perf_df$mean_pv
+```
+
+```{r}
+correlation <- cor.test(digital_utilisation__df$digital_games_usage_for_learning,df_scatter_plot$mean_pv)
+print(correlation)
+```
+```{r}
+df_final <- bind_cols(digital_utilisation__df, school_perf_df)
+```
+
+```{r}
+mat_cov <- cov(df_final,  use ="complete.obs")
+print(mat_cov)
+```
+
+```{r}
+# install.packages("rstatix")
+install.packages("rstatix")
+library(rstatix)
+
+
+# 1. Sélectionner les colonnes numériques
+# 2. Calculer la matrice des p-values
+p_values <- df_final %>%
+  select(where(is.numeric)) %>%
+  cor_pmat()
+
+print(p_values)
+```
+
+
+```{r}
+matrice_cor <- df_final %>% 
+  cor_mat()
+
+print(matrice_cor)
+```
+
+
+
+
+
+```{r}
+ggplot(data = df_scatter_plot, aes(mean_utilisation,mean_pv))+
+  geom_point()
+```
+
