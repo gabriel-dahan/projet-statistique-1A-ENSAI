@@ -217,7 +217,7 @@ correlation <- cor.test(digital_utilisation__df$digital_games_usage_for_learning
 print(correlation)
 ```
 ```{r}
-df_final <- bind_cols(digital_utilisation__df, school_perf_df)
+df_final <- bind_cols(digital_utilisation__df, school_perf_df,df_scatter_plot)
 ```
 
 ```{r}
@@ -227,7 +227,6 @@ print(mat_cov)
 
 ```{r}
 # install.packages("rstatix")
-install.packages("rstatix")
 library(rstatix)
 
 
@@ -247,7 +246,107 @@ matrice_cor <- df_final %>%
 
 print(matrice_cor)
 ```
+```{r}
 
+modele <- aov(mean_pv ~ as.factor(digital_resources_usage_for_learning_at_school_by_day), data = df_final)
+summary(modele)
+```
+
+```{r}
+analyse_groupes <- df_final %>%
+  group_by(digital_resources_usage_for_learning_at_school_by_day) %>%
+  summarise(
+    # Il faut donner un nom (moyenne_notes) et faire le calcul (mean)
+    moyenne_notes = mean(mean_pv, na.rm = TRUE) 
+  )
+
+print(analyse_groupes)
+
+# Le graphique fonctionnera maintenant car 'moyenne_notes' existe
+ggplot(analyse_groupes, aes(x = as.factor(digital_resources_usage_for_learning_at_school_by_day), 
+                            y = moyenne_notes)) +
+  geom_col(fill = "steelblue") +
+  theme_minimal() +
+  labs(title = "Moyenne des notes selon la fréquence d'utilisation",
+       x = "Fréquence d'utilisation",
+       y = "Note Moyenne (pv_mean)")
+```
+```{r}
+trend_data <- df_final %>%
+  group_by(digital_resources_usage_for_learning_at_school_by_day) %>%
+  summarise(
+    moyenne_notes = mean(mean_pv, na.rm = TRUE)
+  )
+```
+
+```{r}
+ggplot(trend_data, aes(x = digital_resources_usage_for_learning_at_school_by_day, 
+                       y = moyenne_notes)) +
+  geom_point() +
+  geom_line(color = "steelblue", size = 1.2)
+  theme_minimal() +
+  labs(title = "Tendance lissée de la performance")
+```
+```{r}
+max_scale <- max(df_final$digital_resources_usage_for_learning_at_school_by_day, na.rm = TRUE)
+
+df_final <- df_final %>%
+  mutate(digital_games_usage_for_learning = case_when(
+      !is.na(digital_games_usage_for_learning) ~ 
+        1 + (digital_games_usage_for_learning - 1) * (max_scale - 1) / (5 - 1),
+      TRUE ~ NA_real_))
+
+donnees_comparaison <- df_final %>%
+  select(mean_pv,
+    digital_games_usage_for_learning, 
+    digital_resources_usage_for_learning_at_school_by_day,
+    digital_resources_usage_for_learning_on_weekends, 
+    digital_resources_usage_for_learning_outside_school_by_day 
+  ) %>%
+  pivot_longer(
+    cols = -mean_pv,             
+    names_to = "Activity Type",  
+    values_to = "Frequence"      
+  ) %>%
+  
+  filter(!is.na(Frequence))%>% 
+  filter(!is.na(mean_pv)) 
+
+synthese_graphique <- donnees_comparaison %>%
+  group_by(Type_Activite, Frequence) %>%
+  summarise(
+    Note_Moyenne = mean(mean_pv, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 6. Tracer le graphique superposé
+ggplot(synthese_graphique, aes(x = as.factor(Frequence), 
+                               y = Note_Moyenne, 
+                               color = Type_Activite,   # Une couleur par activité
+                               group = Type_Activite)) + # Relier les points par activité
+  
+  # Ligne de tendance
+  geom_line(size = 1.2) +
+  
+  # Points pour marquer les paliers
+  geom_point(size = 3) +
+  
+  # Esthétique
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1") + # Palette de couleurs contrastées
+  
+  # Textes et Titres
+  labs(
+    title = "Comparaison de l'impact des écrans sur la performance",
+    subtitle = "Permet de voir quelle activité fait baisser la note le plus vite",
+    x = "Fréquence d'utilisation (1 = Jamais -> 5 = Tous les jours)",
+    y = "Score Moyen PISA (pv_mean)",
+    color = "Type d'Activité"
+  ) +
+  
+  # Placer la légende en bas pour laisser de la place au graphique
+  theme(legend.position = "bottom")
+```
 
 
 
