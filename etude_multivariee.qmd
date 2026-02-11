@@ -1,0 +1,347 @@
+---
+title: "Etude multivariée"
+author: "Groupe 1"
+format: 
+  pdf:
+    toc: false
+    code-fold: show
+    theme: cosmo
+editor: visual
+echo: FALSE
+warning: FALSE
+message: FALSE
+---
+
+```{r, results='hide'}
+library(dplyr)
+library(tidyverse)
+library(psych)
+library(flextable)
+```
+
+```{r, results='hide'}
+responses_raw <- readRDS('./stu_qqq.rds')
+```
+
+```{r,results='hide'}
+responses <- responses_raw |> 
+  select(
+    country = CNT,
+    birth_year = ST003D03T,
+    genre = ST004D01T,
+    index_highest_parental_education = PAREDINT,
+    index_highest_parental_occupation_status = HISEI,
+    index_socioeconomic_status = ESCS,
+    computer_for_work_available = ST250Q02JA,
+    educational_apps_available = ST250Q03JA,
+    internet_access_available = ST250Q05JA,
+    response_medium = ADMINMODE,
+    book_reading_for_school = ST256Q10JA,
+    region_and_schools = STRATUM,
+    
+    digital_resources_usage_for_learning_at_school_by_day = ST326Q01JA,
+    digital_resources_usage_for_learning_outside_school_by_day = ST326Q02JA,
+    digital_resources_usage_for_learning_on_weekends = ST326Q03JA,
+    digital_resources_usage_for_leisure_at_school_by_day = ST326Q04JA,
+    digital_resources_usage_for_leisure_outside_school_by_day = ST326Q05JA,
+    digital_resources_usage_for_leisure_on_weekends = ST326Q06JA,
+    nb_digital_devices_at_home = ST253Q01JA,
+    digital_games_usage_for_learning = IC174Q10JA,
+    
+    pv_math_1 = PV1MATH,
+    pv_math_2 = PV2MATH,
+    pv_math_3 = PV3MATH,
+    pv_math_4 = PV4MATH,
+    pv_math_5 = PV5MATH,
+    pv_math_6 = PV6MATH,
+    pv_math_7 = PV7MATH,
+    pv_math_8 = PV8MATH,
+    pv_math_9 = PV9MATH,
+    pv_math_10 = PV10MATH,
+    pv_reading_comprehension_1 = PV1READ,
+    pv_reading_comprehension_2 = PV2READ,
+    pv_reading_comprehension_3 = PV3READ,
+    pv_reading_comprehension_4 = PV4READ,
+    pv_reading_comprehension_5 = PV5READ,
+    pv_reading_comprehension_6 = PV6READ,
+    pv_reading_comprehension_7 = PV7READ,
+    pv_reading_comprehension_8 = PV8READ,
+    pv_reading_comprehension_9 = PV9READ,
+    pv_reading_comprehension_10 = PV10READ,
+    pv_science_1 = PV1SCIE,
+    pv_science_2 = PV2SCIE,
+    pv_science_3 = PV3SCIE,
+    pv_science_4 = PV4SCIE,
+    pv_science_5 = PV5SCIE,
+    pv_science_6 = PV6SCIE,
+    pv_science_7 = PV7SCIE,
+    pv_science_8 = PV8SCIE,
+    pv_science_9 = PV9SCIE,
+    pv_science_10 = PV10SCIE,
+  )
+
+responses <- responses %>% mutate(pv_math = rowMeans(select(.,pv_math_1,
+                                                 pv_math_2,
+                                                 pv_math_3,
+                                                 pv_math_4,
+                                                 pv_math_5,
+                                                 pv_math_6,
+                                                 pv_math_7,
+                                                 pv_math_8,
+                                                 pv_math_9,
+                                                 pv_math_10), 
+                                                 na.rm = TRUE),
+                                  pv_reading_comprehension = rowMeans(select(.,pv_reading_comprehension_1,
+                                                                  pv_reading_comprehension_2,
+                                                                  pv_reading_comprehension_3,
+                                                                  pv_reading_comprehension_4,
+                                                                  pv_reading_comprehension_5,
+                                                                  pv_reading_comprehension_6,
+                                                                  pv_reading_comprehension_7,
+                                                                  pv_reading_comprehension_8,
+                                                                  pv_reading_comprehension_9,
+                                                                  pv_reading_comprehension_10),
+                                                                  na.rm = TRUE),
+                                  pv_science = rowMeans(select(.,pv_science_1,
+                                                    pv_science_2,
+                                                    pv_science_3,
+                                                    pv_science_4,
+                                                    pv_science_5,
+                                                    pv_science_6,
+                                                    pv_science_7,
+                                                    pv_science_8,
+                                                    pv_science_9,
+                                                    pv_science_10), 
+                                                    na.rm = TRUE))
+
+```
+
+```{r,results='hide'}
+interest_var <- responses %>% select(pv_math,
+                                      pv_reading_comprehension,
+                                      pv_science)
+```
+
+```{r}
+graph1_var <- interest_var %>%
+  select(pv_math, pv_reading_comprehension,pv_science) %>%
+  pivot_longer(
+    cols = everything(), 
+    names_to = "Matieres", 
+    values_to = "Note"
+  )
+
+ggplot(graph1_var, aes(x = Note, fill = Matieres, color = Matieres)) + 
+  geom_density(alpha = 0.3, linewidth = 1) +
+  
+  scale_fill_manual(
+    name = "Discipline",
+    values = c(
+      "pv_math" = "#D55E00",                
+      "pv_reading_comprehension" = "#0072B2", 
+      "pv_science" = "#009E73"             
+    ),
+    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
+  ) +
+  
+  scale_color_manual(
+    name = "Discipline",
+    values = c(
+      "pv_math" = "#D55E00", 
+      "pv_reading_comprehension" = "#0072B2", 
+      "pv_science" = "#009E73"
+    ),
+    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
+  ) +
+  
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 0.1), 
+    name = "Densité de probabilité"
+  ) +
+  
+  labs(
+    title = "Distribution des scores PISA par discipline",
+    x = "Score PISA",
+    caption = "Source : Enquête PISA"
+  ) +
+  
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top",
+    panel.grid.minor = element_blank(), 
+    axis.text.y = element_text(color = "gray40")
+  )
+```
+
+```{r,results='hide'}
+cor(interest_var, use = "complete.obs")
+
+alpha(interest_var)
+```
+
+
+Afin de vérifier la pertinence de la création d'un indicateur unique de performance, nous avons calculé l'Alpha de Cronbach. Le test révèle une cohérence interne très élevée ($\alpha > 0.93$) et une corrélation inter-items forte ($r \approx 0.90$), justifiant ainsi l'agrégation des scores de mathématiques, sciences et compréhension de l'écrit en une variable composite unique.
+
+
+```{r}
+table1 <- data.frame(
+  Discipline = c("Mathématiques", "Compréhension de l'écrit", "Sciences"),
+  Alpha = c(0.95, 0.96, 0.93),         
+  Correlation = c(0.90, 0.93, 0.88)     
+)
+
+ft <- table1 %>%
+  flextable() %>%
+  
+  set_header_labels(
+    Alpha = "Alpha de Cronbach (α)",
+    Correlation = "Corrélation Moyenne (r)"
+  ) %>%
+  
+  autofit() %>%
+  
+ 
+  align(j = 2:3, align = "center", part = "all") %>%
+  
+ 
+  set_caption("Tableau 1 : Indices de cohérence interne et corrélations des disciplines PISA") %>%
+  
+
+  theme_booktabs() %>%
+  
+  
+  bold(part = "header")
+
+ft
+```
+
+```{r,results='hide'}
+interest_var <- interest_var %>%
+  rowwise() %>%
+  mutate(pv_mean = mean(c(pv_math, pv_reading_comprehension, pv_science), na.rm = TRUE))
+```
+
+```{r,results='hide'}
+explicative_var <- responses %>% select(digital_resources_usage_for_learning_at_school_by_day,
+                                        digital_resources_usage_for_learning_outside_school_by_day,
+                                        digital_resources_usage_for_learning_on_weekends,
+                                        digital_games_usage_for_learning)
+```
+
+```{r,results='hide'}
+resultat_alpha <- alpha(explicative_var, check.keys = TRUE)
+print(resultat_alpha$total$std.alpha)
+print(resultat_alpha$alpha.drop)
+```
+
+
+L'étude de la cohérence interne des usages numériques liés à l'apprentissage révèle une hétérogénéité des pratiques. Si l'Alpha de Cronbach global de l'échelle est modeste ($0,57$), l'analyse détaillée montre que l'item relatif aux jeux numériques éducatifs agit comme un facteur de dissonance. Son retrait permettrait à lui seul de porter la fiabilité de l'échelle des ressources classiques à $0,68$.Cette divergence statistique nous conduit à traiter séparément deux dimensions de l'usage numérique : d'une part, les ressources pédagogiques structurées (manuels, articles, logiciels de cours) et d'autre part, la gamification de l'apprentissage, dont l'influence sur les scores PISA suit une trajectoire propre.
+
+
+```{r}
+tab_fiabilite_2 <- data.frame(
+  Indicateur = c(
+    "Ressources à l'école (semaine)",
+    "Ressources hors école (semaine)",
+    "Ressources (week-end)",
+    "Jeux numériques éducatifs"
+  ),
+  Alpha_si_supprime = c(0.48, 0.35, 0.43, 0.68) # Valeurs std.alpha du drop
+)
+
+ft_2 <- flextable(tab_fiabilite_2) %>%
+  set_header_labels(
+    Indicateur = "Usage numérique",
+    Alpha_si_supprime = "Alpha de Cronbach (si retrait)"
+  ) %>%
+  theme_booktabs() %>%
+  autofit() %>%
+  # On met en évidence la ligne des jeux
+  bold(i = 4) %>%
+  color(i = 4, color = "darkred") %>%
+  add_footer_lines("Alpha global : 0,575 | Source : Données PISA") %>%
+  set_caption("Tableau : Test de cohérence des indicateurs d'apprentissage numérique")
+
+ft_2
+```
+
+
+L'analyse des données de l'enquête PISA met en évidence une relation en « U inversé » entre la fréquence d'utilisation des ressources numériques pédagogiques et le score moyen des élèves en mathématiques, sciences et compréhension de l'écrit. Si une utilisation modérée des outils numériques — tant à l'école qu'en dehors — semble corrélée à une amélioration des performances, un effet de saturation apparaît au-delà d'un certain seuil d'intensité. Le point d'inflexion se situe autour du niveau 4 (correspondant à une utilisation modérée) sur l'échelle de fréquence normalisée : à ce stade, les élèves obtiennent les scores les plus élevés, atteignant en moyenne près de 470 points. Passé ce seuil, on observe un décrochage significatif de la performance, le score moyen chutant sous les 430 points pour les utilisateurs les plus intensifs (niveau 8 et 9).
+
+Il convient toutefois de distinguer la nature des activités numériques. L'usage des jeux vidéo à des fins éducatives présente une trajectoire singulière : il ne bénéficie pas de la même dynamique de progression initiale que les autres ressources pédagogiques et décline de manière plus linéaire à mesure que la fréquence augmente. Cette distinction est confirmée par les tests de cohérence interne (Alpha de Cronbach de 0,68 après retrait de la variable), suggérant que les pratiques de « gamification » constituent une dimension comportementale distincte de l'usage des ressources numériques classiques dans le processus d'apprentissage.
+
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center"}
+explicative_interest_var <- bind_cols(explicative_var, interest_var)
+df_graphique <- explicative_interest_var %>%
+  mutate(
+    digital_games_usage_for_learning = case_when(
+      !is.na(digital_games_usage_for_learning) ~ 
+        1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1),
+      TRUE ~ NA_real_
+    )
+  )
+
+df_graphique <- df_graphique %>%
+  select(
+    pv_mean,
+    digital_games_usage_for_learning, 
+    digital_resources_usage_for_learning_at_school_by_day,
+    digital_resources_usage_for_learning_on_weekends, 
+    digital_resources_usage_for_learning_outside_school_by_day 
+  ) %>%
+  pivot_longer(
+    cols = -pv_mean, 
+    names_to = "Type_Activite", 
+    values_to = "Frequence"
+  ) %>%
+  filter(!is.na(Frequence), !is.na(pv_mean))
+
+synthese_graphique <- df_graphique %>%
+  group_by(Type_Activite, Frequence) %>%
+  summarise(Note_Moyenne = mean(pv_mean, na.rm = TRUE), .groups = "drop")
+
+labels_activites <- c(
+  "digital_games_usage_for_learning" = "Jeux numériques éducatifs",
+  "digital_resources_usage_for_learning_at_school_by_day" = "Ressources à l'école (semaine)",
+  "digital_resources_usage_for_learning_on_weekends" = "Ressources (week-end)",
+  "digital_resources_usage_for_learning_outside_school_by_day" = "Ressources hors école (semaine)"
+)
+
+
+ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Type_Activite, group = Type_Activite)) +
+  
+  geom_line(aes(linetype = (Type_Activite == "digital_games_usage_for_learning")), size = 1.1, alpha = 0.8) +
+  geom_point(size = 3) +
+  
+  scale_color_manual(
+    values = c("#D55E00", "#0072B2", "#009E73", "#CC79A7"),
+    labels = labels_activites
+  ) +
+  scale_linetype_manual(values = c("solid", "longdash"), guide = "none") + # Pointillés pour les jeux
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_continuous(breaks = seq(420, 480, 10)) +
+  coord_cartesian(ylim = c(420, 485)) + 
+  
+  labs(
+    title = "Relation entre fréquence d'usage numérique et performance scolaire",
+    subtitle = "Moyenne des scores PISA (Maths, Sciences, Lecture) selon l'intensité d'utilisation",
+    x = "Fréquence d'utilisation (Échelle normalisée de 1 à 9)",
+    y = "Score Moyen PISA",
+    color = "Type d'activité numérique",
+    caption = "Source : Données PISA | Note : L'usage des jeux est distingué par un trait discontinu."
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical",
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(margin = margin(b = 15)),
+    panel.grid.minor = element_blank(),
+    axis.title = element_text(face = "bold"),
+    plot.caption = element_text(hjust = 0, face = "italic", color = "grey40", size = 9),
+    
+  )
+```
