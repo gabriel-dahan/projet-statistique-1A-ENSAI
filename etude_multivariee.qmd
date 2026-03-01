@@ -17,6 +17,7 @@ library(dplyr)
 library(tidyverse)
 library(psych)
 library(flextable)
+library(scales)
 ```
 
 ```{r, results='hide'}
@@ -28,7 +29,7 @@ responses <- responses_raw |>
   select(
     country = CNT,
     birth_year = ST003D03T,
-    genre = ST004D01T,
+    gender = ST004D01T,
     index_highest_parental_education = PAREDINT,
     index_highest_parental_occupation_status = HISEI,
     index_socioeconomic_status = ESCS,
@@ -122,67 +123,16 @@ interest_var <- responses %>% select(pv_math,
                                       pv_science)
 ```
 
-```{r}
-graph1_var <- interest_var %>%
-  select(pv_math, pv_reading_comprehension,pv_science) %>%
-  pivot_longer(
-    cols = everything(), 
-    names_to = "Matieres", 
-    values_to = "Note"
-  )
-
-ggplot(graph1_var, aes(x = Note, fill = Matieres, color = Matieres)) + 
-  geom_density(alpha = 0.3, linewidth = 1) +
-  
-  scale_fill_manual(
-    name = "Discipline",
-    values = c(
-      "pv_math" = "#D55E00",                
-      "pv_reading_comprehension" = "#0072B2", 
-      "pv_science" = "#009E73"             
-    ),
-    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
-  ) +
-  
-  scale_color_manual(
-    name = "Discipline",
-    values = c(
-      "pv_math" = "#D55E00", 
-      "pv_reading_comprehension" = "#0072B2", 
-      "pv_science" = "#009E73"
-    ),
-    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
-  ) +
-  
-  scale_y_continuous(
-    labels = scales::percent_format(accuracy = 0.1), 
-    name = "Densité de probabilité"
-  ) +
-  
-  labs(
-    title = "Distribution des scores PISA par discipline",
-    x = "Score PISA",
-    caption = "Source : Enquête PISA"
-  ) +
-  
-  theme_minimal() +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    legend.position = "top",
-    panel.grid.minor = element_blank(), 
-    axis.text.y = element_text(color = "gray40")
-  )
+```{}
 ```
 
 ```{r,results='hide'}
 cor(interest_var, use = "complete.obs")
 
-alpha(interest_var)
+psych::alpha(interest_var)
 ```
 
-
 Afin de vérifier la pertinence de la création d'un indicateur unique de performance, nous avons calculé l'Alpha de Cronbach. Le test révèle une cohérence interne très élevée ($\alpha > 0.93$) et une corrélation inter-items forte ($r \approx 0.90$), justifiant ainsi l'agrégation des scores de mathématiques, sciences et compréhension de l'écrit en une variable composite unique.
-
 
 ```{r}
 table1 <- data.frame(
@@ -216,6 +166,14 @@ ft <- table1 %>%
 ft
 ```
 
+*Tableau 1*
+
+```{r}
+responses <- responses %>%
+  rowwise() %>%
+  mutate(pv_mean = mean(c(pv_math, pv_reading_comprehension, pv_science), na.rm = TRUE))
+```
+
 ```{r,results='hide'}
 interest_var <- interest_var %>%
   rowwise() %>%
@@ -229,15 +187,17 @@ explicative_var <- responses %>% select(digital_resources_usage_for_learning_at_
                                         digital_games_usage_for_learning)
 ```
 
-```{r,results='hide'}
-resultat_alpha <- alpha(explicative_var, check.keys = TRUE)
+```{r, warning=FALSE, message=FALSE, error=TRUE, results='hide'}
+data_propre <- explicative_var %>%
+  mutate(across(everything(), as.numeric)) %>%
+  filter(rowSums(!is.na(.)) > 0)
+
+resultat_alpha <- psych::alpha(data_propre, check.keys = TRUE)
 print(resultat_alpha$total$std.alpha)
 print(resultat_alpha$alpha.drop)
 ```
 
-
 L'étude de la cohérence interne des usages numériques liés à l'apprentissage révèle une hétérogénéité des pratiques. Si l'Alpha de Cronbach global de l'échelle est modeste ($0,57$), l'analyse détaillée montre que l'item relatif aux jeux numériques éducatifs agit comme un facteur de dissonance. Son retrait permettrait à lui seul de porter la fiabilité de l'échelle des ressources classiques à $0,68$.Cette divergence statistique nous conduit à traiter séparément deux dimensions de l'usage numérique : d'une part, les ressources pédagogiques structurées (manuels, articles, logiciels de cours) et d'autre part, la gamification de l'apprentissage, dont l'influence sur les scores PISA suit une trajectoire propre.
-
 
 ```{r}
 tab_fiabilite_2 <- data.frame(
@@ -247,7 +207,7 @@ tab_fiabilite_2 <- data.frame(
     "Ressources (week-end)",
     "Jeux numériques éducatifs"
   ),
-  Alpha_si_supprime = c(0.48, 0.35, 0.43, 0.68) # Valeurs std.alpha du drop
+  Alpha_si_supprime = c(0.48, 0.35, 0.43, 0.68) 
 )
 
 ft_2 <- flextable(tab_fiabilite_2) %>%
@@ -257,7 +217,6 @@ ft_2 <- flextable(tab_fiabilite_2) %>%
   ) %>%
   theme_booktabs() %>%
   autofit() %>%
-  # On met en évidence la ligne des jeux
   bold(i = 4) %>%
   color(i = 4, color = "darkred") %>%
   add_footer_lines("Alpha global : 0,575 | Source : Données PISA") %>%
@@ -266,13 +225,13 @@ ft_2 <- flextable(tab_fiabilite_2) %>%
 ft_2
 ```
 
+*Tableau 2*
 
 L'analyse des données de l'enquête PISA met en évidence une relation en « U inversé » entre la fréquence d'utilisation des ressources numériques pédagogiques et le score moyen des élèves en mathématiques, sciences et compréhension de l'écrit. Si une utilisation modérée des outils numériques — tant à l'école qu'en dehors — semble corrélée à une amélioration des performances, un effet de saturation apparaît au-delà d'un certain seuil d'intensité. Le point d'inflexion se situe autour du niveau 4 (correspondant à une utilisation modérée) sur l'échelle de fréquence normalisée : à ce stade, les élèves obtiennent les scores les plus élevés, atteignant en moyenne près de 470 points. Passé ce seuil, on observe un décrochage significatif de la performance, le score moyen chutant sous les 430 points pour les utilisateurs les plus intensifs (niveau 8 et 9).
 
 Il convient toutefois de distinguer la nature des activités numériques. L'usage des jeux vidéo à des fins éducatives présente une trajectoire singulière : il ne bénéficie pas de la même dynamique de progression initiale que les autres ressources pédagogiques et décline de manière plus linéaire à mesure que la fréquence augmente. Cette distinction est confirmée par les tests de cohérence interne (Alpha de Cronbach de 0,68 après retrait de la variable), suggérant que les pratiques de « gamification » constituent une dimension comportementale distincte de l'usage des ressources numériques classiques dans le processus d'apprentissage.
 
-
-```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center"}
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE, error=TRUE}
 explicative_interest_var <- bind_cols(explicative_var, interest_var)
 df_graphique <- explicative_interest_var %>%
   mutate(
@@ -343,5 +302,301 @@ ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Type_Act
     axis.title = element_text(face = "bold"),
     plot.caption = element_text(hjust = 0, face = "italic", color = "grey40", size = 9),
     
+  )
+```
+
+*Figure 1*
+
+Bien que les données mettent en évidence une relation en "cloche" entre l'usage numérique et la performance, il est impératif d'interpréter ces résultats avec prudence. Une analyse complémentaire intégrant des variables de contrôle telles que l’âge, le sexe ou le milieu socio-économique est nécessaire pour isoler l'effet réel de l'usage numérique et s'assurer que les tendances observées ne sont pas biaisées par des disparités démographiques.
+
+En effet l'intégration du genre comme variable de contrôle s'avère déterminante pour affiner ce diagnostic. On observe que chez les filles, les scores demeurent plus stables et subissent un décrochage moins brutal en cas d'utilisation excessive. À l'inverse, les garçons manifestent une vulnérabilité accrue aux usages excessifs, particulièrement hors du cadre scolaire où leurs performances chutent drastiquement. Cette divergence souligne que l'impact du numérique n'est pas universel mais fortement médiatisé par les profils comportementaux des élèves. Le cas des jeux numériques éducatifs est, à ce titre, exemplaire : contrairement aux autres ressources, cette activité ne présente aucun bénéfice incrémental, montrant un déclin de performance quasi linéaire dès les premiers niveaux de fréquence.
+
+```{r}
+control_var <- responses %>% select(country,
+                                    gender,
+                                    birth_year,
+                                    index_socioeconomic_status)
+```
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE, error=TRUE}
+
+df_graphique3 <- responses %>%
+  select(
+    pv_mean, 
+    gender,
+    digital_games_usage_for_learning, 
+    digital_resources_usage_for_learning_at_school_by_day,
+    digital_resources_usage_for_learning_on_weekends, 
+    digital_resources_usage_for_learning_outside_school_by_day 
+  ) %>% 
+  mutate(
+    digital_games_usage_for_learning = case_when(
+      !is.na(digital_games_usage_for_learning) ~ 
+        1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1),
+      TRUE ~ NA_real_
+    )) %>% 
+  pivot_longer(
+    cols = -c(pv_mean, gender), 
+    names_to = "Type_Activite", 
+    values_to = "Frequence"
+  ) %>%
+  filter(!is.na(Frequence), !is.na(pv_mean))
+
+synthese_graphique <- df_graphique3 %>%
+  filter(!is.na(!!sym("gender"))) %>%
+  mutate(Sexe = ifelse(!!sym("gender") == 1, "Filles", "Garçons")) %>%
+  mutate(Activity_Label = case_when(
+    Type_Activite == "digital_games_usage_for_learning" ~ "Jeux numériques éducatifs",
+    Type_Activite == "digital_resources_usage_for_learning_at_school_by_day" ~ "Ressources à l'école (semaine)",
+    Type_Activite == "digital_resources_usage_for_learning_on_weekends" ~ "Ressources (week-end)",
+    Type_Activite == "digital_resources_usage_for_learning_outside_school_by_day" ~ "Ressources hors école (semaine)",
+    TRUE ~ Type_Activite
+  )) %>%
+  group_by(Activity_Label, Frequence, Sexe) %>%
+  summarise(Note_Moyenne = mean(pv_mean, na.rm = TRUE), .groups = "drop")
+
+ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Activity_Label, group = Activity_Label)) +
+
+  geom_line(aes(linetype = (Activity_Label == "Jeux numériques éducatifs")), size = 1.1) +
+  geom_point(size = 2.5) +
+  
+  facet_wrap(~ Sexe, ncol = 2) + 
+
+  scale_color_manual(
+    values = c(
+      "Jeux numériques éducatifs" = "#D55E00",
+      "Ressources à l'école (semaine)" = "#0072B2",
+      "Ressources (week-end)" = "#009E73",
+      "Ressources hors école (semaine)" = "#CC79A7"
+    )
+  ) +
+  scale_linetype_manual(values = c("solid", "longdash"), guide = "none") +
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_continuous(breaks = seq(400, 500, 20), limits = c(400, 500)) +
+  labs(
+    title = "Relation entre fréquence d'usage numérique et performance scolaire",
+    subtitle = "Moyenne des scores PISA (Maths, Sciences, Lecture) selon l'intensité d'utilisation",
+    x = "Fréquence d'utilisation (Échelle normalisée de 1 à 9)",
+    y = "Score Moyen PISA",
+    color = "Type d'activité numérique",
+    caption = "Source : Données PISA | Note : L'usage des jeux est distingué par un trait discontinu."
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical",
+    
+    legend.title = element_text(face = "bold", size = 10),
+    legend.text = element_text(size = 9),
+    legend.spacing.y = unit(0.1, 'cm'), 
+    legend.key.height = unit(0.4, "cm"),
+    
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(margin = margin(b = 15), size = 11),
+
+    strip.text = element_text(face = "bold", size = 12),
+    panel.spacing = unit(1.5, "lines"), 
+
+    panel.grid.minor = element_blank(),
+    axis.title = element_text(face = "bold")
+  ) +
+  
+  guides(color = guide_legend(ncol = 2, title.position = "top"))
+```
+
+*Figure 2*
+
+Malgré une différence entre les deux genres notamment lors des cas extrêmes d'utilisation, il existe un biais relatif à la fréquence d'utilisation par genre. En effet la proportion des femmes est égale à celle des hommes en cas d'utilisation "moyenne" mais dans les cas extrêmes (forte utilisation et aucune utilisation) elles sont sous représentées. Ce biais n'influence pas le message global d'une différence de l'impact des technologie sur les performances des hommes et des femmes.
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE, error=TRUE}
+df_barres <- responses %>%
+  select(
+    gender,
+    digital_games_usage_for_learning,
+    digital_resources_usage_for_learning_at_school_by_day,
+    digital_resources_usage_for_learning_on_weekends,
+    digital_resources_usage_for_learning_outside_school_by_day
+  ) %>%
+  mutate(
+    digital_games_usage_for_learning = 1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1)
+  ) %>%
+  mutate(
+    Score_Global = rowMeans(cbind(
+      digital_games_usage_for_learning,
+      digital_resources_usage_for_learning_at_school_by_day,
+      digital_resources_usage_for_learning_on_weekends,
+      digital_resources_usage_for_learning_outside_school_by_day
+    ), na.rm = TRUE),
+    Modalite = round(Score_Global) 
+  ) %>%
+  filter(!is.na(Modalite), !is.na(gender)) %>%
+  mutate(Sexe = ifelse(gender == 1, "Filles", "Garçons"))
+
+ggplot(df_barres, aes(x = factor(Modalite), fill = Sexe)) +
+  geom_bar(position = "fill", width = 0.7, alpha = 0.9) + 
+  
+  scale_fill_manual(values = c("Filles" = "#CC79A7", "Garçons" = "#0072B2")) +
+  
+  scale_y_continuous(labels = percent_format()) + 
+  
+  labs(
+    title = "Proportion de Filles et de Garçons selon l'intensité d'usage numérique",
+    subtitle = "Répartition (en %) au sein de chaque niveau d'utilisation",
+    x = "Fréquence globale moyenne (1 = Très faible, 9 = Très intensive)",
+    y = "Pourcentage d'élèves",
+    fill = "Sexe"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.major.x = element_blank(), 
+    axis.title = element_text(face = "bold")
+  )
+```
+
+*Figure 3*
+
+Une étude similaire peut être effectuée en contrôlant le jeu de données par l'âge
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE, error=TRUE}
+
+df_graphique4 <- responses %>%
+  select(
+    pv_mean, 
+    birth_year,
+    digital_games_usage_for_learning, 
+    digital_resources_usage_for_learning_at_school_by_day,
+    digital_resources_usage_for_learning_on_weekends, 
+    digital_resources_usage_for_learning_outside_school_by_day 
+  ) %>% 
+  mutate(
+    digital_games_usage_for_learning = case_when(
+      !is.na(digital_games_usage_for_learning) ~ 
+        1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1),
+      TRUE ~ NA_real_
+    )) %>% 
+  pivot_longer(
+    cols = -c(pv_mean, birth_year), 
+    names_to = "Type_Activite", 
+    values_to = "Frequence"
+  ) %>%
+  filter(!is.na(Frequence), !is.na(pv_mean))
+
+synthese_graphique <- df_graphique3 %>%
+  filter(!is.na(!!sym("birth_year"))) %>%
+  mutate(Activity_Label = case_when(
+    Type_Activite == "digital_games_usage_for_learning" ~ "Jeux numériques éducatifs",
+    Type_Activite == "digital_resources_usage_for_learning_at_school_by_day" ~ "Ressources à l'école (semaine)",
+    Type_Activite == "digital_resources_usage_for_learning_on_weekends" ~ "Ressources (week-end)",
+    Type_Activite == "digital_resources_usage_for_learning_outside_school_by_day" ~ "Ressources hors école (semaine)",
+    TRUE ~ Type_Activite
+  )) %>%
+  group_by(Activity_Label, Frequence, birth_year) %>%
+  summarise(Note_Moyenne = mean(pv_mean, na.rm = TRUE), .groups = "drop")
+
+ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Activity_Label, group = Activity_Label)) +
+
+  geom_line(aes(linetype = (Activity_Label == "Jeux numériques éducatifs")), size = 1.1) +
+  geom_point(size = 2.5) +
+  
+  facet_wrap(~ Sexe, ncol = 2) + 
+
+  scale_color_manual(
+    values = c(
+      "Jeux numériques éducatifs" = "#D55E00",
+      "Ressources à l'école (semaine)" = "#0072B2",
+      "Ressources (week-end)" = "#009E73",
+      "Ressources hors école (semaine)" = "#CC79A7"
+    )
+  ) +
+  scale_linetype_manual(values = c("solid", "longdash"), guide = "none") +
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_continuous(breaks = seq(400, 500, 20), limits = c(400, 500)) +
+  labs(
+    title = "Relation entre fréquence d'usage numérique et performance scolaire",
+    subtitle = "Moyenne des scores PISA (Maths, Sciences, Lecture) selon l'intensité d'utilisation",
+    x = "Fréquence d'utilisation (Échelle normalisée de 1 à 9)",
+    y = "Score Moyen PISA",
+    color = "Type d'activité numérique",
+    caption = "Source : Données PISA | Note : L'usage des jeux est distingué par un trait discontinu."
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical",
+    
+    legend.title = element_text(face = "bold", size = 10),
+    legend.text = element_text(size = 9),
+    legend.spacing.y = unit(0.1, 'cm'), 
+    legend.key.height = unit(0.4, "cm"),
+    
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(margin = margin(b = 15), size = 11),
+
+    strip.text = element_text(face = "bold", size = 12),
+    panel.spacing = unit(1.5, "lines"), 
+
+    panel.grid.minor = element_blank(),
+    axis.title = element_text(face = "bold")
+  ) +
+  
+  guides(color = guide_legend(ncol = 2, title.position = "top"))
+```
+
+Annexes :
+
+```{r}
+{r}
+graph1_var <- interest_var %>%
+  select(pv_math, pv_reading_comprehension,pv_science) %>%
+  pivot_longer(
+    cols = everything(), 
+    names_to = "Matieres", 
+    values_to = "Note"
+  )
+
+ggplot(graph1_var, aes(x = Note, fill = Matieres, color = Matieres)) + 
+  geom_density(alpha = 0.3, linewidth = 1) +
+  
+  scale_fill_manual(
+    name = "Discipline",
+    values = c(
+      "pv_math" = "#D55E00",                
+      "pv_reading_comprehension" = "#0072B2", 
+      "pv_science" = "#009E73"             
+    ),
+    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
+  ) +
+  
+  scale_color_manual(
+    name = "Discipline",
+    values = c(
+      "pv_math" = "#D55E00", 
+      "pv_reading_comprehension" = "#0072B2", 
+      "pv_science" = "#009E73"
+    ),
+    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
+  ) +
+  
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 0.1), 
+    name = "Densité de probabilité"
+  ) +
+  
+  labs(
+    title = "Distribution des scores PISA par discipline",
+    x = "Score PISA",
+    caption = "Source : Enquête PISA"
+  ) +
+  
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top",
+    panel.grid.minor = element_blank(), 
+    axis.text.y = element_text(color = "gray40")
   )
 ```
