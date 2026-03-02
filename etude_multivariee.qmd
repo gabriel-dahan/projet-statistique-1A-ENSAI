@@ -124,6 +124,12 @@ interest_var <- responses %>% select(pv_math,
                                       pv_science)
 ```
 
+<<<<<<< HEAD
+=======
+```         
+```
+
+>>>>>>> 5df11eeafe00f5996d4b03e9b84036796d9c7254
 ```{r,results='hide'}
 cor(interest_var, use = "complete.obs")
 

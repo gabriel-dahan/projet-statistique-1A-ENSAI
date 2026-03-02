@@ -1,0 +1,101 @@
+---
+title: "Etude univariée (+bivariées bonus)"
+author: "Groupe 1"
+format: 
+  pdf:
+    toc: false
+    code-fold: show
+    theme: cosmo
+editor: visual
+warning: FALSE
+---
+
+
+Ce document a pour objectif d'effectuer des études univariées dans le cadre du projet statistique "Technologie et performances éducatives", afin de faire parler des données de la manière la plus simple possible.
+
+Nous allons ainsi analyser les performances éducatives puis l'utilisation des technologie, afin d'en analyser les valeurs extrêmes, les distributions, etc. 
+
+Plan:
+ - distributions de notes, boxplot valeurs extrêmes;
+ - analyse du mode de réponse au questionnaire (papier, ordi);
+ - ...
+ - traitement de la non réponse.
+
+## Chargement des données et librairies
+
+On récupère les variables renommées et sauvegardées dans le fichier `clean_stu_qqq.rds`:
+
+```{r}
+responses <- readRDS('./clean_stu_qqq.rds')
+```
+
+On charge dplyr et ggplot2: 
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+## Distribution des notes des élèves
+
+Voyons en premier lieu la distribution des notes des élèves ayant répondu aux questionnaires:
+
+```{r}
+math_distrib_base <- ggplot(responses, aes(x = pv_math)) + 
+  labs(
+    title = "Distribution des scores PISA en Mathématiques",
+    x = "Score en Mathématiques",
+    y = "Nombre d'élèves"
+  ) +
+  theme_minimal()
+
+math_distrib_base +
+  geom_histogram(fill = "steelblue", color = "white", bins = 30)
+```
+Moyenne et écart-type: 
+
+```{r}
+mean_pv_math <- mean(responses$pv_math, na.rm = TRUE)
+std_pv_math <- sd(responses$pv_math, na.rm = TRUE)
+```
+
+Superposons alors une loi normale $\mathcal{N}(440.87, 101.84)$ sur la distribution précédente des notes: 
+
+```{r}
+math_distrib_base +
+  geom_histogram(
+    aes(y = after_stat(density)), # Normalisation
+    fill = "steelblue", 
+    color = "white", 
+    bins = 30
+  ) +
+  stat_function(
+    fun = dnorm, 
+    args = list(mean = mean_pv_math, sd = std_pv_math), 
+    color = "orange", 
+    linewidth = 1.2
+  )
+```
+
+Cette représentation théorique de la distribution des scores des élèves est intéressante mais n'est pas exacte. En effet, on observe un plus grand étalage des notes vers la droite de la courbe.
+
+## Etude bivariée des scores en fonction du niveau académique
+
+```{r}
+responses_propres <- responses %>% 
+  filter(!academic_level %in% c(96, 97, 98, 99)) %>% 
+  drop_na(pv_math, academic_level) %>% 
+  mutate(academic_level = factor(academic_level, levels = c(7, 8, 9, 10, 11, 12, 13)))
+
+ggplot(data = responses_propres, aes(x = academic_level, y = pv_math, fill = academic_level)) +
+  geom_boxplot(alpha = 0.7, show.legend = FALSE) +
+  labs(
+    title = "Distribution des scores en mathématiques selon le niveau scolaire",
+    subtitle = "Analyse bivariée après exclusion des non-réponses",
+    x = "Niveau scolaire",
+    y = "Score en Mathématiques"
+  ) +
+  theme_minimal()
+```
+
+
