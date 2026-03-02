@@ -28,6 +28,7 @@ responses_raw <- readRDS('./stu_qqq.rds')
 responses <- responses_raw |> 
   select(
     country = CNT,
+    academic_lvl = ST001D01T,
     birth_year = ST003D03T,
     gender = ST004D01T,
     index_highest_parental_education = PAREDINT,
@@ -123,14 +124,13 @@ interest_var <- responses %>% select(pv_math,
                                       pv_science)
 ```
 
-```{}
-```
-
 ```{r,results='hide'}
 cor(interest_var, use = "complete.obs")
 
 psych::alpha(interest_var)
 ```
+
+# Construction d'un indicateur de performance.
 
 Afin de vérifier la pertinence de la création d'un indicateur unique de performance, nous avons calculé l'Alpha de Cronbach. Le test révèle une cohérence interne très élevée ($\alpha > 0.93$) et une corrélation inter-items forte ($r \approx 0.90$), justifiant ainsi l'agrégation des scores de mathématiques, sciences et compréhension de l'écrit en une variable composite unique.
 
@@ -166,8 +166,6 @@ ft <- table1 %>%
 ft
 ```
 
-*Tableau 1*
-
 ```{r}
 responses <- responses %>%
   rowwise() %>%
@@ -187,15 +185,21 @@ explicative_var <- responses %>% select(digital_resources_usage_for_learning_at_
                                         digital_games_usage_for_learning)
 ```
 
-```{r, warning=FALSE, message=FALSE, error=TRUE, results='hide'}
+```{r, warning=FALSE, results='hide'}
 data_propre <- explicative_var %>%
   mutate(across(everything(), as.numeric)) %>%
-  filter(rowSums(!is.na(.)) > 0)
+  tidyr::drop_na() %>% 
+  as.data.frame()       
 
 resultat_alpha <- psych::alpha(data_propre, check.keys = TRUE)
+
 print(resultat_alpha$total$std.alpha)
 print(resultat_alpha$alpha.drop)
 ```
+
+# Etude de la courbe en "U inversé" de l'effet de l'usage des technologies sur les performance.
+
+## Différence entre deux types de technologie.
 
 L'étude de la cohérence interne des usages numériques liés à l'apprentissage révèle une hétérogénéité des pratiques. Si l'Alpha de Cronbach global de l'échelle est modeste ($0,57$), l'analyse détaillée montre que l'item relatif aux jeux numériques éducatifs agit comme un facteur de dissonance. Son retrait permettrait à lui seul de porter la fiabilité de l'échelle des ressources classiques à $0,68$.Cette divergence statistique nous conduit à traiter séparément deux dimensions de l'usage numérique : d'une part, les ressources pédagogiques structurées (manuels, articles, logiciels de cours) et d'autre part, la gamification de l'apprentissage, dont l'influence sur les scores PISA suit une trajectoire propre.
 
@@ -220,18 +224,18 @@ ft_2 <- flextable(tab_fiabilite_2) %>%
   bold(i = 4) %>%
   color(i = 4, color = "darkred") %>%
   add_footer_lines("Alpha global : 0,575 | Source : Données PISA") %>%
-  set_caption("Tableau : Test de cohérence des indicateurs d'apprentissage numérique")
+  set_caption("Tableau 2 : Test de cohérence des indicateurs d'apprentissage numérique")
 
 ft_2
 ```
 
-*Tableau 2*
+## Analyse de la courbe
 
-L'analyse des données de l'enquête PISA met en évidence une relation en « U inversé » entre la fréquence d'utilisation des ressources numériques pédagogiques et le score moyen des élèves en mathématiques, sciences et compréhension de l'écrit. Si une utilisation modérée des outils numériques — tant à l'école qu'en dehors — semble corrélée à une amélioration des performances, un effet de saturation apparaît au-delà d'un certain seuil d'intensité. Le point d'inflexion se situe autour du niveau 4 (correspondant à une utilisation modérée) sur l'échelle de fréquence normalisée : à ce stade, les élèves obtiennent les scores les plus élevés, atteignant en moyenne près de 470 points. Passé ce seuil, on observe un décrochage significatif de la performance, le score moyen chutant sous les 430 points pour les utilisateurs les plus intensifs (niveau 8 et 9).
+L'analyse des données de l'enquête PISA met en évidence une relation en « U inversé » entre la fréquence d'utilisation des ressources numériques pédagogiques et le score moyen des élèves en mathématiques, sciences et compréhension de l'écrit. Si une utilisation modérée des outils numériques, tant à l'école qu'en dehors, semble corrélée à une amélioration des performances, un effet de saturation apparaît au-delà d'un certain seuil d'intensité. Le point d'inflexion se situe autour du niveau 4 (correspondant à une utilisation modérée) sur l'échelle de fréquence normalisée : à ce stade, les élèves obtiennent les scores les plus élevés, atteignant en moyenne près de 470 points. Passé ce seuil, on observe un décrochage significatif de la performance, le score moyen chutant sous les 430 points pour les utilisateurs les plus intensifs (niveau 8 et 9).
 
 Il convient toutefois de distinguer la nature des activités numériques. L'usage des jeux vidéo à des fins éducatives présente une trajectoire singulière : il ne bénéficie pas de la même dynamique de progression initiale que les autres ressources pédagogiques et décline de manière plus linéaire à mesure que la fréquence augmente. Cette distinction est confirmée par les tests de cohérence interne (Alpha de Cronbach de 0,68 après retrait de la variable), suggérant que les pratiques de « gamification » constituent une dimension comportementale distincte de l'usage des ressources numériques classiques dans le processus d'apprentissage.
 
-```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE, error=TRUE}
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 explicative_interest_var <- bind_cols(explicative_var, interest_var)
 df_graphique <- explicative_interest_var %>%
   mutate(
@@ -289,7 +293,7 @@ ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Type_Act
     x = "Fréquence d'utilisation (Échelle normalisée de 1 à 9)",
     y = "Score Moyen PISA",
     color = "Type d'activité numérique",
-    caption = "Source : Données PISA | Note : L'usage des jeux est distingué par un trait discontinu."
+    caption = "Figure 1 | Source : Données PISA | Note : L'usage des jeux est distingué par un trait discontinu."
   ) +
   
   theme_minimal(base_size = 12) +
@@ -305,11 +309,9 @@ ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Type_Act
   )
 ```
 
-*Figure 1*
+# Etude de l'influence de l'usage des technologies sous la contrainte de variables de contrôle.
 
-Bien que les données mettent en évidence une relation en "cloche" entre l'usage numérique et la performance, il est impératif d'interpréter ces résultats avec prudence. Une analyse complémentaire intégrant des variables de contrôle telles que l’âge, le sexe ou le milieu socio-économique est nécessaire pour isoler l'effet réel de l'usage numérique et s'assurer que les tendances observées ne sont pas biaisées par des disparités démographiques.
-
-En effet l'intégration du genre comme variable de contrôle s'avère déterminante pour affiner ce diagnostic. On observe que chez les filles, les scores demeurent plus stables et subissent un décrochage moins brutal en cas d'utilisation excessive. À l'inverse, les garçons manifestent une vulnérabilité accrue aux usages excessifs, particulièrement hors du cadre scolaire où leurs performances chutent drastiquement. Cette divergence souligne que l'impact du numérique n'est pas universel mais fortement médiatisé par les profils comportementaux des élèves. Le cas des jeux numériques éducatifs est, à ce titre, exemplaire : contrairement aux autres ressources, cette activité ne présente aucun bénéfice incrémental, montrant un déclin de performance quasi linéaire dès les premiers niveaux de fréquence.
+Bien que les données mettent en évidence une relation en "cloche" entre l'usage numérique et la performance, il est impératif d'interpréter ces résultats avec prudence. Une analyse complémentaire intégrant des variables de contrôle telles que l’âge, le sexe ou le milieu socio-économique est nécessaire pour isoler l'effet réel de l'usage numérique et s'assurer que les tendances observées ne sont pas biaisées par des disparités démographiques. \## Intégration du genre comme variable de contrôle En effet l'intégration du genre comme variable de contrôle s'avère déterminante pour affiner ce diagnostic. On observe que chez les filles, les scores demeurent plus stables et subissent un décrochage moins brutal en cas d'utilisation excessive. À l'inverse, les garçons manifestent une vulnérabilité accrue aux usages excessifs, particulièrement hors du cadre scolaire où leurs performances chutent drastiquement. Cette divergence souligne que l'impact du numérique n'est pas universel mais fortement médiatisé par les profils comportementaux des élèves. Le cas des jeux numériques éducatifs est, à ce titre, exemplaire : contrairement aux autres ressources, cette activité ne présente aucun bénéfice incrémental, montrant un déclin de performance quasi linéaire dès les premiers niveaux de fréquence.
 
 ```{r}
 control_var <- responses %>% select(country,
@@ -318,7 +320,7 @@ control_var <- responses %>% select(country,
                                     index_socioeconomic_status)
 ```
 
-```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE, error=TRUE}
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 
 df_graphique3 <- responses %>%
   select(
@@ -379,7 +381,7 @@ ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Activity
     x = "Fréquence d'utilisation (Échelle normalisée de 1 à 9)",
     y = "Score Moyen PISA",
     color = "Type d'activité numérique",
-    caption = "Source : Données PISA | Note : L'usage des jeux est distingué par un trait discontinu."
+    caption = "Figure 2 | Source : Données PISA | Note : L'usage des jeux est distingué par un trait discontinu."
   ) +
   
   theme_minimal(base_size = 12) +
@@ -405,11 +407,9 @@ ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Activity
   guides(color = guide_legend(ncol = 2, title.position = "top"))
 ```
 
-*Figure 2*
-
 Malgré une différence entre les deux genres notamment lors des cas extrêmes d'utilisation, il existe un biais relatif à la fréquence d'utilisation par genre. En effet la proportion des femmes est égale à celle des hommes en cas d'utilisation "moyenne" mais dans les cas extrêmes (forte utilisation et aucune utilisation) elles sont sous représentées. Ce biais n'influence pas le message global d'une différence de l'impact des technologie sur les performances des hommes et des femmes.
 
-```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE, error=TRUE}
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 df_barres <- responses %>%
   select(
     gender,
@@ -445,7 +445,8 @@ ggplot(df_barres, aes(x = factor(Modalite), fill = Sexe)) +
     subtitle = "Répartition (en %) au sein de chaque niveau d'utilisation",
     x = "Fréquence globale moyenne (1 = Très faible, 9 = Très intensive)",
     y = "Pourcentage d'élèves",
-    fill = "Sexe"
+    fill = "Genre",
+    caption = "Figure 3 | Source : Données PISA"
   ) +
   theme_minimal(base_size = 13) +
   theme(
@@ -456,97 +457,98 @@ ggplot(df_barres, aes(x = factor(Modalite), fill = Sexe)) +
   )
 ```
 
-*Figure 3*
+## Etude de la dynamique de la courbes modulée par l'année d'étude des élèves.
 
-Une étude similaire peut être effectuée en contrôlant le jeu de données par l'âge
+Une étude similaire peut être effectuée en contrôlant le jeu de données par l'année d'étude. L'analyse de la superposition des classes met en évidence une différence majeure d'une année d'étude à l'autre : l'amplitude de l'impact des usages numériques. Si l'on observe attentivement la plage de valeurs couverte par chaque courbe, on constate que la sensibilité au numérique s'accroît considérablement avec le niveau scolaire. Pour les élèves des classes inférieures (Grades 7 et 8), les courbes sont particulièrement plates, indiquant que la fréquence d'utilisation des écrans n'entraîne qu'une très faible variation de leurs scores PISA, qui restent confinés dans une plage étroite d'à peine une vingtaine de points. À l'inverse, les élèves des niveaux supérieurs (Grades 11 et 12) sont nettement plus touchés par ces dynamiques comportementales. Leurs courbes affichent une dispersion (ou plage de valeurs) beaucoup plus forte, avec des chutes de performance abruptes pouvant dépasser les 50 points d'écart en cas d'usage intensif, que ce soit pour les jeux ou les ressources. Cette évolution d'année en année démontre que plus un élève est avancé scolairement, plus son score PISA est réactif ses habitudes numériques : les étudiants de haut niveau ont paradoxalement beaucoup plus de points à perdre face à une surexposition que les élèves des niveaux inférieurs, pour qui l'intensité de la pratique numérique n'a finalement qu'un impact marginal. Mais ces élèves de niveaux inférieurs profite moins de l'effet bénéfique des technologies là où ceux issus de niveaux supérieurs peuvent énormément progresser en cas d'utilisation moyenne.
 
-```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE, error=TRUE}
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
+
+library(ggplot2)
+library(dplyr)
 
 df_graphique4 <- responses %>%
+  
+  # 1. On sélectionne TOUTES les colonnes dont on a besoin
   select(
-    pv_mean, 
+    pv_mean,
     birth_year,
-    digital_games_usage_for_learning, 
+    academic_lvl, # Essentiel pour ton graphique par classe !
+    digital_games_usage_for_learning,
     digital_resources_usage_for_learning_at_school_by_day,
-    digital_resources_usage_for_learning_on_weekends, 
-    digital_resources_usage_for_learning_outside_school_by_day 
-  ) %>% 
-  mutate(
-    digital_games_usage_for_learning = case_when(
-      !is.na(digital_games_usage_for_learning) ~ 
-        1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1),
-      TRUE ~ NA_real_
-    )) %>% 
-  pivot_longer(
-    cols = -c(pv_mean, birth_year), 
-    names_to = "Type_Activite", 
-    values_to = "Frequence"
+    digital_resources_usage_for_learning_on_weekends,
+    digital_resources_usage_for_learning_outside_school_by_day
   ) %>%
-  filter(!is.na(Frequence), !is.na(pv_mean))
-
-synthese_graphique <- df_graphique3 %>%
-  filter(!is.na(!!sym("birth_year"))) %>%
-  mutate(Activity_Label = case_when(
-    Type_Activite == "digital_games_usage_for_learning" ~ "Jeux numériques éducatifs",
-    Type_Activite == "digital_resources_usage_for_learning_at_school_by_day" ~ "Ressources à l'école (semaine)",
-    Type_Activite == "digital_resources_usage_for_learning_on_weekends" ~ "Ressources (week-end)",
-    Type_Activite == "digital_resources_usage_for_learning_outside_school_by_day" ~ "Ressources hors école (semaine)",
-    TRUE ~ Type_Activite
-  )) %>%
-  group_by(Activity_Label, Frequence, birth_year) %>%
-  summarise(Note_Moyenne = mean(pv_mean, na.rm = TRUE), .groups = "drop")
-
-ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Activity_Label, group = Activity_Label)) +
-
-  geom_line(aes(linetype = (Activity_Label == "Jeux numériques éducatifs")), size = 1.1) +
-  geom_point(size = 2.5) +
   
-  facet_wrap(~ birth_year, ncol = 2) + 
+  # 2. On aligne l'échelle des jeux (de 1-5 vers 1-9) pour pouvoir comparer
+  mutate(
+    digital_games_usage_for_learning = 1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1)
+  ) %>%
+  
+  # 3. On pivote les activités pour avoir nos belles colonnes "Type_Activite" et "Frequence"
+  # On exclut bien pv_mean, birth_year et academic_lvl du pivotement avec le "-"
+  pivot_longer(
+    cols = -c(pv_mean, birth_year, academic_lvl),
+    names_to = "Type_Activite",
+    values_to = "Frequence"
+  )
+synthese_niveau <- df_graphique4 %>%
+  filter(!is.na(Frequence), !is.na(pv_mean), !is.na(academic_lvl)) %>%
+  
+  mutate(academic_lvl = as.numeric(as.character(academic_lvl))) %>%
+  filter(academic_lvl <= 13) %>% 
+  
+  mutate(
+    Categorie = if_else(
+      Type_Activite == "digital_games_usage_for_learning",
+      "Jeux numériques éducatifs",
+      "Ressources scolaires (Moyenne des 3)"
+    ),
+    Classe = as.factor(academic_lvl) 
+  ) %>%
+  group_by(Classe, Categorie, Frequence) %>%
+  summarise(
+    Note_Moyenne = mean(pv_mean, na.rm = TRUE),
+    Nb_Eleves = n(), 
+    .groups = "drop"
+  ) %>%
+  filter(Nb_Eleves > 20)
 
-  scale_color_manual(
-    values = c(
-      "Jeux numériques éducatifs" = "#D55E00",
-      "Ressources à l'école (semaine)" = "#0072B2",
-      "Ressources (week-end)" = "#009E73",
-      "Ressources hors école (semaine)" = "#CC79A7"
-    )
-  ) +
-  scale_linetype_manual(values = c("solid", "longdash"), guide = "none") +
-  scale_x_continuous(breaks = 1:9) +
-  scale_y_continuous(breaks = seq(400, 500, 20), limits = c(400, 500)) +
+ggplot(synthese_niveau, aes(
+    x = Frequence, 
+    y = Note_Moyenne, 
+    color = Categorie, 
+    shape = Classe, 
+    group = interaction(Categorie, Classe) 
+  )) +
+  
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  
+  scale_color_manual(values = c(
+    "Jeux numériques éducatifs" = "#D55E00",          
+    "Ressources scolaires (Moyenne des 3)" = "#0072B2" 
+  )) +
+  facet_wrap(~ Categorie) +
+  
   labs(
-    title = "Relation entre fréquence d'usage numérique et performance scolaire",
-    subtitle = "Moyenne des scores PISA (Maths, Sciences, Lecture) selon l'intensité d'utilisation",
-    x = "Fréquence d'utilisation (Échelle normalisée de 1 à 9)",
+    title = "Évolution des scores PISA selon l'usage numérique et la classe",
+    subtitle = "Comparaison des dynamiques : Jeux vs Ressources",
+    x = "Fréquence d'utilisation (1 = Très faible, 9 = Très intensive)",
     y = "Score Moyen PISA",
-    color = "Type d'activité numérique",
-    caption = "Source : Données PISA | Note : L'usage des jeux est distingué par un trait discontinu."
+    shape = "Année d'étude",
+    caption = "Figure 4"
   ) +
-  
-  theme_minimal(base_size = 12) +
+  theme_minimal(base_size = 13) +
   theme(
-    legend.position = "bottom",
-    legend.box = "vertical",
-    
-    legend.title = element_text(face = "bold", size = 10),
-    legend.text = element_text(size = 9),
-    legend.spacing.y = unit(0.1, 'cm'), 
-    legend.key.height = unit(0.4, "cm"),
-    
+    legend.position = "right", 
+    legend.title = element_text(face = "bold"),
     plot.title = element_text(face = "bold", size = 14),
-    plot.subtitle = element_text(margin = margin(b = 15), size = 11),
-
-    strip.text = element_text(face = "bold", size = 12),
-    panel.spacing = unit(1.5, "lines"), 
-
-    panel.grid.minor = element_blank(),
-    axis.title = element_text(face = "bold")
+    strip.text = element_text(face = "bold", size = 12) 
   ) +
-  
-  guides(color = guide_legend(ncol = 2, title.position = "top"))
+  guides(color = "none")
 ```
 
-Annexes :
+# Annexes
 
 ```{r}
 graph1_var <- interest_var %>%
