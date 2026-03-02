@@ -57,6 +57,8 @@ On garde une multitude de variables que l'on renomme :
 
     -   ST250Q05JA : internet_access_available
 
+    -   ST001D01T : academic_level
+
     -   ADMINMODE : response_medium (biais qu'il peut y avoir sur le plan socio-économique lorsque quelqu'un utilise du papier plutôt qu'un ordinateur pour répondre, et ses prédispositions à utiliser ou non un ordinateur)
 
     -   ST256Q10JA : book_reading_for_school (biais qu'il peut y avoir pour quelqu'un utilisant plusieurs méthodes d'apprentissage)
@@ -107,6 +109,7 @@ responses <- responses_raw |>
     computer_for_work_available = ST250Q02JA,
     educational_apps_available = ST250Q03JA,
     internet_access_available = ST250Q05JA,
+    academic_level = ST001D01T,
     response_medium = ADMINMODE,
     book_reading_for_school = ST256Q10JA,
     region_and_schools = STRATUM,
