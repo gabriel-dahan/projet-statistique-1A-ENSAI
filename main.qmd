@@ -125,7 +125,7 @@ Gabriel Dahan\\
 
 \begin{flushright}
 \emph{Encadrant(e) :}\\
-...\\
+Mme GHIORGHITA\\
 \end{flushright}
 
 \vfill 
@@ -143,16 +143,15 @@ Selon l’Organisation de coopération et de développement économiques (OCDE),
 
 Afin d’analyser ces enjeux, le volet consacré aux technologies de l'enquête internationale PISA 2022 fournit un cadre d'analyse pour mesurer la présence de ces outils chez les jeunes de 15 ans dans 81 pays. Cette évaluation ne se limite pas aux tests de compétences en mathématiques, sciences et lecture ; elle documente également l'intensité, la nature et le contexte socio-économique des usages numériques des élèves. Afin de caractériser cet environnement numérique, l’enquête PISA s'appuie sur plusieurs indicateurs permettant de définir le profil de l'élève connecté : l’accès matériel, l’indice de statut économique, social et culturel (ESCS), l’intensité et la nature de l’usage.
 
-Nous considérons la notion d’usage numérique à travers deux dimensions : l'usage pédagogique (logiciels d'apprentissage, recherche documentaire) et l'usage récréatif. L’indice de statut économique, social et culturel (ESCS) nous servira de point d’ancrage pour comparer comment le capital culturel familial influence la capacité de l'élève à transformer l'outil en levier de réussite. Car portés par leur environnement familial, les enfants de milieux favorisés utilisent la machine pour créer et apprendre, tandis que les enfants de milieux modestes la détournent massivement vers le divertissement.
-Dès lors, les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau, mais des disparités d’usages au sein même des établissements. Leur existence révèle une inégale exploitation de l’outil selon le milieu social.
+Nous considérons la notion d’usage numérique à travers deux dimensions : l'usage pédagogique (logiciels d'apprentissage, recherche documentaire) et l'usage récréatif. L’indice de statut économique, social et culturel (ESCS) nous servira de point d’ancrage pour comparer comment le capital culturel familial influence la capacité de l'élève à transformer l'outil en levier de réussite. Car portés par leur environnement familial, les enfants de milieux favorisés utilisent la machine pour créer et apprendre, tandis que les enfants de milieux modestes la détournent massivement vers le divertissement. Dès lors, les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau, mais des disparités d’usages au sein même des établissements. Leur existence révèle une inégale exploitation de l’outil selon le milieu social.
 
-On peut alors se demander : 
+On peut alors se demander :
 
 > Existe-t-il un "dosage numérique optimal" universel favorisant la réussite scolaire, ou est-ce que ce seuil de bascule technologique est intrinsèquement modulé par le capital socio-culturel de l'élève ?
 
 Dans cette étude, nous cherchons ainsi à caractériser le point de bascule statistique où l’offre technologique cesse d’être une aide pour devenir un frein à l’apprentissage. Notre analyse s'articulera autour de trois axes. Dans une partie préliminaire nous analyserons l’état des lieux de la fracture numérique en soulignant les disparités d’équipements et d’accès ainsi que le poids des déterminants socio-économiques, puis nous étudierons l’ambivalence du lien entre numérique et réussite par la construction d’un indicateur multidimensionnel et en identifiant l’existence d’un seuil au-delà duquel les technologies sont contre-productives. Enfin nous évaluerons les différents facteurs socio-économiques, académiques, géographique modérateurs de la performance éducative.
 
-# 0 | Partie préliminaire : Etat des lieux de la fracture numérique
+# 0 \| Partie préliminaire : Etat des lieux de la fracture numérique
 
 ## 0.1. L'accès matériel : une fracture résorbée ?
 
@@ -196,25 +195,40 @@ flextable(tableau_acces) %>%
 
 Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique de ces outils varie drastiquement d'un système éducatif à l'autre. La cartographie de l'utilisation moyenne des ressources numériques à l'école met en évidence des clivages géographiques majeurs (@fig-carte-usage). Ces disparités nationales rappellent que l'accès au numérique est avant tout le fruit de politiques éducatives, offrant ainsi un cadre très hétérogène à l'évaluation des performances.
 
-```{r}
+```{}
+```
+
+```{r, warning=FALSE, results='hide'}
 #| label: fig-carte-usage
 #| fig-cap: "Intensité moyenne d'utilisation des ressources numériques à l'école par pays"
 
 usage_ecole_pays <- responses %>%
   group_by(country) %>%
   summarise(usage_moyen_ecole = mean(digital_resources_usage_for_learning_at_school_by_day, na.rm = TRUE)) %>%
-  drop_na(usage_moyen_ecole)
+  drop_na(usage_moyen_ecole) %>%
+  # LE TRADUCTEUR EST ICI : On renomme les codes PISA pour qu'ils matchent avec la carte
+  mutate(country = case_when(
+    country == "KSV" ~ "KOS", # Kosovo
+    country == "PSE" ~ "PSX", # Palestine
+    country == "QAZ" ~ "AZE", # Azerbaïdjan (Baku)
+    country == "QUR" ~ "UKR", # Ukraine
+    country == "TAP" ~ "TWN", # Taïwan
+    TRUE ~ country            # On ne touche pas aux autres
+  ))
 
+# 2. Chargement de la carte
 monde <- ne_countries(scale = "medium", returnclass = "sf")
 
+# 3. Jointure des données avec la carte
 carte_usage <- monde %>%
-  left_join(usage_ecole_pays, by = c("iso_a3" = "country"))
+  left_join(usage_ecole_pays, by = c("adm0_a3" = "country"))
 
+# 4. Tracé de la carte
 ggplot(data = carte_usage) +
   geom_sf(aes(fill = usage_moyen_ecole), color = "white", linewidth = 0.1) +
   scale_fill_viridis_c(
-    option = "magma", 
-    na.value = "lightgray", 
+    option = "magma",
+    na.value = "lightgray",
     name = "Fréquence moyenne\n(Échelle 1-9)"
   ) +
   labs(
@@ -255,11 +269,11 @@ ggplot(responses_escs, aes(x = ESCS_quartile, y = nb_digital_devices_at_home, fi
   theme_minimal()
 ```
 
-# 1 | L'ambivalence du lien entre numérique et résultats scolaires
+# 1 \| L'ambivalence du lien entre numérique et résultats scolaires
 
 ## 1.1. Méthodologie : Construction d'un indicateur multidimensionnel
 
-Afin de vérifier la pertinence de la création d'un indicateur unique de performance, nous avons calculé l'Alpha de Cronbach. Le test révèle une cohérence interne très élevée ($\alpha > 0.93$) et une corrélation inter-items forte ($r \approx 0.90$), justifiant ainsi l'agrégation des scores de mathématiques, sciences et compréhension de l'écrit en une variable composite unique. 
+Afin de vérifier la pertinence de la création d'un indicateur unique de performance, nous avons calculé l'Alpha de Cronbach. Le test révèle une cohérence interne très élevée ($\alpha > 0.93$) et une corrélation inter-items forte ($r \approx 0.90$), justifiant ainsi l'agrégation des scores de mathématiques, sciences et compréhension de l'écrit en une variable composite unique.
 
 ```{r}
 #| label: tbl-alpha-cronbach
@@ -444,11 +458,11 @@ ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Type_Act
   )
 ```
 
-# 2 | Les facteurs modérateurs de la performance 
+# 2 \| Les facteurs modérateurs de la performance
 
-## 2.1. Les facteurs socio-économiques et académiques 
+## 2.1. Les facteurs socio-économiques et académiques
 
-Bien que les données mettent en évidence une relation en "cloche" entre l'usage numérique et la performance, il est impératif d'interpréter ces résultats avec prudence. Une analyse complémentaire intégrant des variables de contrôle telles que l’âge, le sexe ou le milieu socio-économique est nécessaire pour isoler l'effet réel de l'usage numérique et s'assurer que les tendances observées ne sont pas biaisées par des disparités démographiques. 
+Bien que les données mettent en évidence une relation en "cloche" entre l'usage numérique et la performance, il est impératif d'interpréter ces résultats avec prudence. Une analyse complémentaire intégrant des variables de contrôle telles que l’âge, le sexe ou le milieu socio-économique est nécessaire pour isoler l'effet réel de l'usage numérique et s'assurer que les tendances observées ne sont pas biaisées par des disparités démographiques.
 
 ### Intégration du genre comme variable de contrôle
 
@@ -827,9 +841,9 @@ fviz_mca_var(res.mca,
   theme_minimal()
 ```
 
-__Axe 1__ : La première dimension oppose diamétralement les élèves équipés (regroupement des modalités Ordi_Oui, Net_Oui, Apps_Oui sur la gauche) aux élèves non équipés (regroupement de Net_Non, Ordi_Non, Apps_Non sur la droite). La position très excentrée du bloc "Non" souligne que l'absence d'équipement est un profil minoritaire mais aux caractéristiques très marquées par rapport à la norme (le côté "Oui", plus proche de l'origine).
+**Axe 1** : La première dimension oppose diamétralement les élèves équipés (regroupement des modalités Ordi_Oui, Net_Oui, Apps_Oui sur la gauche) aux élèves non équipés (regroupement de Net_Non, Ordi_Non, Apps_Non sur la droite). La position très excentrée du bloc "Non" souligne que l'absence d'équipement est un profil minoritaire mais aux caractéristiques très marquées par rapport à la norme (le côté "Oui", plus proche de l'origine).
 
-__Axe 2__ : La seconde dimension est exclusivement construite par la variable du sexe, opposant très nettement la modalité Fille à la modalité Garçon. Le rouge vif indique une représentation parfaite.
+**Axe 2** : La seconde dimension est exclusivement construite par la variable du sexe, opposant très nettement la modalité Fille à la modalité Garçon. Le rouge vif indique une représentation parfaite.
 
 L'élément remarquable de cette analyse est dans la position des modalités Fille et Garçon par rapport à l'axe horizontal. Ces deux points se situent presque exactement sur le zéro de la Dim. 1. Sur le plan statistique, il y a donc indépendance totale entre le sexe et le niveau d'équipement matériel. Autrement dit, les garçons et les filles ont une probabilité équivalente d'être équipés ou non en outils numériques à la maison.
 
