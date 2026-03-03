@@ -125,7 +125,7 @@ Gabriel Dahan\\
 
 \begin{flushright}
 \emph{Encadrant(e) :}\\
-Mme GHIORGHITA\\
+Eliza Ghiorghita\\
 \end{flushright}
 
 \vfill 
