@@ -124,12 +124,6 @@ interest_var <- responses %>% select(pv_math,
                                       pv_science)
 ```
 
-<<<<<<< HEAD
-=======
-```         
-```
-
->>>>>>> 5df11eeafe00f5996d4b03e9b84036796d9c7254
 ```{r,results='hide'}
 cor(interest_var, use = "complete.obs")
 
@@ -474,24 +468,19 @@ library(dplyr)
 
 df_graphique4 <- responses %>%
   
-  # 1. On sélectionne TOUTES les colonnes dont on a besoin
   select(
     pv_mean,
     birth_year,
-    academic_lvl, # Essentiel pour ton graphique par classe !
+    academic_lvl, 
     digital_games_usage_for_learning,
     digital_resources_usage_for_learning_at_school_by_day,
     digital_resources_usage_for_learning_on_weekends,
     digital_resources_usage_for_learning_outside_school_by_day
   ) %>%
-  
-  # 2. On aligne l'échelle des jeux (de 1-5 vers 1-9) pour pouvoir comparer
   mutate(
     digital_games_usage_for_learning = 1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1)
   ) %>%
   
-  # 3. On pivote les activités pour avoir nos belles colonnes "Type_Activite" et "Frequence"
-  # On exclut bien pv_mean, birth_year et academic_lvl du pivotement avec le "-"
   pivot_longer(
     cols = -c(pv_mean, birth_year, academic_lvl),
     names_to = "Type_Activite",
@@ -553,6 +542,89 @@ ggplot(synthese_niveau, aes(
   ) +
   guides(color = "none")
 ```
+L'observation spécifique des courbes liées aux jeux numériques éducatifs met en évidence un phénomène particulièrement marquant : l'absence totale de bénéfice académique, et ce, quel que soit le niveau d'étude de l'élève. Contrairement aux ressources scolaires classiques qui présentent une zone d'efficacité optimale, l'usage des jeux éducatifs se traduit par une baisse continue des scores PISA pour absolument toutes les classes, du Grade 7 au Grade 12. Aucune classe, qu'elle soit en difficulté ou scolairement très avancée, ne parvient à tirer un quelconque profit d'une utilisation fréquente de ces outils. L'augmentation de cette pratique étant universellement corrélée à une détérioration des performances, cette dynamique strictement descendante pousse à s'interroger sur la véritable nature de ces applications : la dimension ludique semble ici prendre irrémédiablement le pas sur le bénéfice pédagogique initialement espéré. Les jeux éducatifs agissent ainsi comme une véritable passerelle comportementale entre les technologies d'apprentissage et le divertissement pur. Si l'introduction d'une mécanique de jeu, même sous couvert d'éducation, pénalise systématiquement les performances de l'ensemble des élèves, il devient indispensable d'isoler et d'analyser l'impact des usages numériques strictement récréatifs, ce qui nous amène naturellement à explorer la relation entre la réussite scolaire et le temps d'écran exclusivement consacré au loisir.
+
+# Etude de l'utilisation de ressources numériques pour le loisir
+
+L'intégration des usages numériques strictement récréatifs au sein de notre analyse permet de nuancer fortement l'impact du temps d'écran sur les performances académiques et de révéler des comportements très contrastés selon le contexte. Contrairement à la dynamique strictement descendante et linéaire observée pour les jeux éducatifs, qui pénalisent l'élève de manière continue, les usages de loisirs en dehors du cadre scolaire (le week-end et en semaine hors de l'école) dessinent une trajectoire en cloche tout à fait inattendue. De manière contre-intuitive, l'abstinence numérique totale sur le temps libre (fréquence 1) n'est absolument pas corrélée aux meilleurs résultats ; au contraire, ces élèves affichent des scores initiaux assez faibles. Les courbes révèlent qu'une utilisation modérée à régulière de ces ressources récréatives (se situant autour des niveaux 4 à 6 sur notre échelle) est associée aux scores PISA les plus élevés, culminant au-delà des 480 points. Ce phénomène suggère qu'une pratique de loisir mesurée (réseaux sociaux, vidéos, communication) fait aujourd'hui partie intégrante de la socialisation et de l'équilibre des adolescents, participant potentiellement à un bien-être général favorable aux apprentissages. Bien entendu, passé ce seuil d'optimisation, l'hyper-connexion récréative à domicile (niveaux 8 et 9) finit par exercer son effet délétère classique, la surcharge d'écran empiétant inévitablement sur le temps de sommeil, de lecture ou de travail personnel, ce qui entraîne une rechute marquée des performances.
+
+Cependant, cette tolérance au loisir numérique s'effondre de manière spectaculaire dès lors que cet usage s'infiltre dans l'enceinte de l'établissement scolaire. La courbe représentant les usages récréatifs à l'école (en bleu) se détache très nettement par sa physionomie particulièrement destructrice. Passé un très léger seuil de tolérance (niveau 2, pouvant correspondre à une rapide consultation sur smartphone lors des intercours), l'augmentation de la fréquence de ces usages de loisirs au sein de l'école provoque la chute de performance la plus vertigineuse et la plus profonde de toute notre étude. Elle entraîne rapidement les scores moyens vers le bas, s'enfonçant dangereusement sous la barre critique des 400 points pour les utilisateurs intensifs. Cette dégradation abrupte s'interprète sans ambiguïté : un usage récréatif intense à l'école traduit une distraction directe et massive durant le temps d'instruction. L'élève n'est plus dans une logique de détente post-scolaire, mais dans une substitution active du temps d'attention et d'apprentissage par le divertissement (jeux en classe, réseaux sociaux sous la table). Au final, cette comparaison démontre que la nocivité de l'écran ne réside pas uniquement dans sa nature récréative, mais surtout dans le contexte de sa consommation. Si le loisir numérique modéré à la maison semble s'inscrire dans un mode de vie équilibré propice à la réussite, son irruption non régulée sur le lieu scolaire agit comme un perturbateur académique absolu, dont les dommages surpassent même ceux de l'usage intensif de jeux prétendument éducatifs.
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
+
+df_graphique_mixte <- responses %>%
+  select(
+    pv_mean,
+    digital_games_usage_for_learning, 
+    digital_resources_usage_for_leisure_at_school_by_day,
+    digital_resources_usage_for_leisure_on_weekends, 
+    digital_resources_usage_for_leisure_outside_school_by_day 
+  ) %>%
+  
+  mutate(
+    digital_games_usage_for_learning = case_when(
+      !is.na(digital_games_usage_for_learning) ~ 
+        1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1),
+      TRUE ~ NA_real_
+    )
+  ) %>%
+  pivot_longer(
+    cols = -pv_mean, 
+    names_to = "Type_Activite", 
+    values_to = "Frequence"
+  ) %>%
+  filter(!is.na(Frequence), !is.na(pv_mean))
+
+synthese_graphique_mixte <- df_graphique_mixte %>%
+  group_by(Type_Activite, Frequence) %>%
+  summarise(Note_Moyenne = mean(pv_mean, na.rm = TRUE), .groups = "drop")
+
+labels_activites_mixtes <- c(
+  "digital_games_usage_for_learning" = "Jeux numériques éducatifs",
+  "digital_resources_usage_for_leisure_at_school_by_day" = "Loisirs à l'école (semaine)",
+  "digital_resources_usage_for_leisure_on_weekends" = "Loisirs (week-end)",
+  "digital_resources_usage_for_leisure_outside_school_by_day" = "Loisirs hors école (semaine)"
+)
+
+ggplot(synthese_graphique_mixte, aes(x = Frequence, y = Note_Moyenne, color = Type_Activite, group = Type_Activite)) +
+
+  geom_line(aes(linetype = (Type_Activite == "digital_games_usage_for_learning")), linewidth = 1.1, alpha = 0.8) +
+  geom_point(size = 3) +
+  
+  scale_color_manual(
+    values = c(
+      "digital_games_usage_for_learning" = "#D55E00",
+      "digital_resources_usage_for_leisure_at_school_by_day" = "#0072B2",
+      "digital_resources_usage_for_leisure_on_weekends" = "#009E73",
+      "digital_resources_usage_for_leisure_outside_school_by_day" = "#CC79A7"
+    ),
+    labels = labels_activites_mixtes
+  ) +
+  
+  scale_linetype_manual(values = c("solid", "longdash"), guide = "none") + 
+  scale_x_continuous(breaks = 1:9) +
+  
+  labs(
+    title = "Comparaison de l'impact des jeux éducatifs et des loisirs numériques",
+    subtitle = "Moyenne des scores PISA (Maths, Sciences, Lecture) selon l'intensité d'utilisation",
+    x = "Fréquence d'utilisation (Échelle normalisée de 1 à 9)",
+    y = "Score Moyen PISA",
+    color = "Type d'activité numérique",
+    caption = "Source : Figure 5 | Données PISA | Note : L'usage des jeux est distingué par un trait discontinu."
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical",
+    plot.title = element_text(face = "bold", size = 13),
+    plot.subtitle = element_text(margin = margin(b = 15)),
+    panel.grid.minor = element_blank(),
+    axis.title = element_text(face = "bold"),
+    plot.caption = element_text(hjust = 0, face = "italic", color = "grey40", size = 9)
+  )
+```
+
 
 # Annexes
 
