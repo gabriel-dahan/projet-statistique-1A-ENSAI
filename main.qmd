@@ -139,7 +139,7 @@ Eliza Ghiorghita\\
 
 # Introduction
 
-Selon l’Organisation de coopération et de développement économiques (OCDE), en 2022, le gain de performance associé à une utilisation modérée des outils numériques à l’école (jusqu’à une heure par jour) s’élève en moyenne à 14 points en mathématiques par rapport aux non-utilisateurs. À l'inverse, dès que l'usage devient intensif ou génère de la distraction, les scores chutent de 15 points en moyenne. Ce phénomène est le reflet de la dualité des technologies dans le milieu scolaire : si elles offrent des opportunités de personnalisation de l'apprentissage, elles constituent également un facteur de dispersion de l’attention. La question de l’usage des écrans apparaît alors comme un enjeu essentiel, car la « sur-connexion » peut devenir un facteur de renonciation aux efforts cognitifs nécessaires à la performance éducative. En 2022, trois élèves sur dix indiquent être régulièrement distraits par les écrans en classe, un taux qui souligne l'urgence de définir un cadre d'usage raisonné.
+Selon l’Organisation de coopération et de développement économiques (OCDE), en 2022, le gain de performance associé à une utilisation modérée des outils numériques à l’école (jusqu’à une heure par jour) s’élève en moyenne à 14 points en mathématiques par rapport aux non-utilisateurs. À l'inverse, dès que l'usage devient intensif ou génère de la distraction, les scores chutent de 15 points en moyenne. Ce phénomène est le reflet de la dualité des technologies dans le milieu scolaire : si elles offrent des opportunités de personnalisation de l'apprentissage, elles constituent également un facteur de dispersion de l’attention. La question de l’usage des écrans apparaît alors comme un enjeu essentiel, la « sur-connexion » peut devenir un facteur de renonciation aux efforts cognitifs nécessaires à la performance éducative. En 2022, trois élèves sur dix indiquent être régulièrement distraits par les écrans en classe, un taux qui souligne l'urgence de définir un cadre d'usage raisonné.
 
 Afin d’analyser ces enjeux, le volet consacré aux technologies de l'enquête internationale PISA 2022 fournit un cadre d'analyse pour mesurer la présence de ces outils chez les jeunes de 15 ans dans 81 pays. Cette évaluation ne se limite pas aux tests de compétences en mathématiques, sciences et lecture ; elle documente également l'intensité, la nature et le contexte socio-économique des usages numériques des élèves. Afin de caractériser cet environnement numérique, l’enquête PISA s'appuie sur plusieurs indicateurs permettant de définir le profil de l'élève connecté : l’accès matériel, l’indice de statut économique, social et culturel (ESCS), l’intensité et la nature de l’usage.
 
@@ -153,9 +153,55 @@ Dans cette étude, nous cherchons ainsi à caractériser le point de bascule sta
 
 # 0 \| Partie préliminaire : Etat des lieux de la fracture numérique
 
-## 0.1. L'accès matériel : une fracture résorbée ?
+## 0.1. Enquête PISA et présentation des données
 
-Avant de corréler l'usage du numérique aux performances académiques, il convient de dresser un état des lieux de l'accès matériel aux outils technologiques. L'analyse descriptive de la base de données PISA révèle une démocratisation de l'équipement de base. En observant la disponibilité d'une connexion internet, d'un ordinateur pour le travail et d'applications éducatives, on constate qu'une vaste majorité d'élèves dispose de cet arsenal à domicile. Ce niveau d'équipement primaire confirme notre postulat initial : les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau. L'enjeu de l'inégalité se déplace inévitablement vers la manière dont ce matériel est exploité par les élèves.
+L'évaluation internationale **PISA** est une vaste enquête menée sous l'égide de l'OCDE tous les trois ans depuis l'an 2000. Elle a pour objectif principal d'évaluer les compétences des élèves de 15 ans (qui arrivent généralement en fin de scolarité obligatoire) dans trois domaines fondamentaux : la compréhension de l'écrit, la culture mathématique et la culture scientifique.
+
+Contrairement à des évaluations classiques, PISA ne se concentre pas uniquement sur la restitution des programmes scolaires, mais évalue plutôt l'aptitude des élèves à raisonner, formuler, employer et interpréter des concepts pour résoudre des problèmes ancrés dans des situations du monde réel.
+
+L'édition de 2022 a impliqué 690 000 élèves issus de 81 pays. À chaque cycle, un domaine est évalué de manière plus poussée. En 2022, la priorité a été donnée à la culture mathématique. En France, environ 6 700 élèves ont été tirés au sort dans 285 établissements pour assurer une représentativité nationale . La majorité de ces élèves (64,2 %) étaient scolarisés en classe de seconde générale et technologique
+
+Le test se déroule sur ordinateur. Il est composé de plusieurs unités ancrées dans des contextes de la vie réelle (personnels, professionnels, sociétaux ou scientifiques) et propose différents formats de réponses, notamment des questions à choix multiple et des questions à réponse construite ouverte.En plus des compétences scolaires, PISA s'intéresse à l'environnement des élèves en récoltant des données sur leur accès aux équipements (comme les technologies numériques) et leur indice de statut économique, social et culturel afin d'analyser les facteurs modérateurs de la réussite.
+
+Dans le cadre du projet statistique analysant les données PISA, les variables d'intérêt étudiées se divisent en deux grandes catégories principales : celles liées aux technologies et leurs utilisations, et celles mesurant les performances éducatives.
+
+1.  Les variables liées aux technologies et à leurs utilisations.
+
+Ce groupe de variables permet de quantifier la fréquence, le contexte (école ou domicile) et le but (apprentissage ou loisir) de l'utilisation des outils numériques par les élèves.
+
+ST326Q01JA (digital_resources_usage_for_learning_at_school_by_day) : Mesure l'utilisation quotidienne de ressources numériques pour l'apprentissage à l'école. 
+
+ST326Q02JA (digital_resources_usage_for_learning_outside_school_by_day) : Mesure l'utilisation quotidienne de ressources numériques pour l'apprentissage en dehors de l'école.
+
+ST326Q03JA (digital_resources_usage_for_learning_on_weekends) : Mesure l'utilisation de ressources numériques pour l'apprentissage pendant le week-end. 
+
+ST326Q04JA (digital_resources_usage_for_leisure_at_school_by_day) : Mesure l'utilisation quotidienne de ressources numériques pour les loisirs à l'école. 
+
+ST326Q05JA (digital_resources_usage_for_leisure_outside_school_by_day) : Mesure l'utilisation quotidienne de ressources numériques pour les loisirs en dehors de l'école. 
+
+ST326Q06JA (digital_resources_usage_for_leisure_on_weekends) : Mesure l'utilisation de ressources numériques pour les loisirs pendant le week-end. 
+
+ST253Q01JA (nb_digital_devices_at_home) : Quantifie le nombre d'appareils numériques disponibles au domicile de l'élève.
+
+IC174Q10JA (digital_games_usage_for_learning) : Évalue l'utilisation de jeux numériques à des fins éducatives.
+
+2.  Les variables liées aux performances éducatives.
+
+Ces variables servent à évaluer la réussite et le parcours scolaire des élèves évalués par l'OCDE. 
+
+PV1MATH (pv_math) : Le score de l'élève dans le domaine de la culture mathématique. 
+
+PV1READ (pv_reading_comprehension) : Le score de l'élève en compréhension de l'écrit (lecture). 
+
+PV1SCIE (pv_science) : Le score de l'élève dans le domaine de la culture scientifique. 
+
+REPEAT (repeated_a_year) : Indique si l'élève a redoublé une année au cours de sa scolarité .
+
+AJOUTER analyse des NA, ...
+
+## 0.2 L'accès matériel : une fracture résorbée ?
+
+Avant de corréler l'usage du numérique aux performances académiques, il convient de dresser un état des lieux de l'accès matériel aux outils technologiques. L'analyse descriptive de la base de données PISA révèle une démocratisation de l'équipement de base. En observant la disponibilité d'une connexion internet, d'un ordinateur pour le travail et d'applications éducatives, on constate qu'une vaste majorité d'élèves dispose ces outils à domicile. Ce niveau d'équipement primaire confirme notre postulat initial : les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau. L'enjeu de l'inégalité se déplace vers la manière dont ce matériel est exploité par les élèves.
 
 ```{r}
 #| label: tbl-acces-materiel
@@ -191,11 +237,11 @@ flextable(tableau_acces) %>%
   align(j = 1, align = "left", part = "all")
 ```
 
-## 0.2. La cartographie mondiale des usages
+## 0.3. La cartographie mondiale des usages
 
-Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique de ces outils varie drastiquement d'un système éducatif à l'autre. La cartographie de l'utilisation moyenne des ressources numériques à l'école met en évidence des clivages géographiques majeurs (@fig-carte-usage). Ces disparités nationales rappellent que l'accès au numérique est avant tout le fruit de politiques éducatives, offrant ainsi un cadre très hétérogène à l'évaluation des performances.
+Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique de ces outils varie d'un système éducatif à l'autre. La cartographie de l'utilisation moyenne des ressources numériques à l'école met en évidence des clivages géographiques majeurs (@fig-carte-usage). Ces disparités nationales rappellent que l'accès au numérique est avant tout le fruit de politiques éducatives, offrant ainsi un cadre très hétérogène à l'évaluation des performances.
 
-```{}
+```         
 ```
 
 ```{r, warning=FALSE, results='hide'}
@@ -243,9 +289,9 @@ ggplot(data = carte_usage) +
   )
 ```
 
-## 0.3. Un poids du statut socio-économique sur le suréquipement
+## 0.4. Un poids du statut socio-économique sur le suréquipement
 
-Si la fracture d'accès primaire se réduit, l'indice de statut économique, social et culturel (ESCS) demeure un puissant déterminant du niveau d'équipement technologique. L'analyse de la dispersion du nombre d'appareils numériques au sein du foyer selon les quartiles socio-économiques montre une corrélation évidente : les familles les plus favorisées cumulent un nombre significativement plus élevé d'écrans. Cette abondance matérielle dans les milieux aisés confirme que l'enjeu ne réside plus dans le manque d'outils, mais potentiellement dans la surexposition. C'est cette dynamique environnementale, dictée par le capital socio-culturel, qui rend nécessaire la recherche du point de bascule étudié dans la partie suivante (@fig-escs-equipement).
+Si la fracture d'accès primaire se réduit, l'indice de statut économique, social et culturel (ESCS) demeure un puissant déterminant du niveau d'équipement technologique. L'analyse de la dispersion du nombre d'appareils numériques au sein du foyer selon les quartiles socio-économiques montre une corrélation : les familles les plus favorisées cumulent un nombre significativement plus élevé d'écrans. Cette abondance matérielle dans les milieux aisés confirme que l'enjeu ne réside plus dans le manque d'outils, mais potentiellement dans la surexposition. C'est cette dynamique environnementale, dictée par le capital socio-culturel, qui rend nécessaire la recherche du point de bascule étudié dans la partie suivante (@fig-escs-equipement).
 
 ```{r}
 #| label: fig-escs-equipement
