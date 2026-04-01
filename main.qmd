@@ -1075,7 +1075,7 @@ ggplot(synthese_loisir_classe, aes(
   )
 ```
 
-```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}{r}
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 #| label: fig-comparaison-disciplines-loisirs-ecole
 #| fig-cap: "Impact de l'usage récréatif à l'école selon la discipline et le niveau scolaire"
 
