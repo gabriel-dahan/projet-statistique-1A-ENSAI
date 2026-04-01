@@ -164,39 +164,47 @@ Le test se déroule sur ordinateur. Il est composé de plusieurs unités ancrée
 
 Dans le cadre du projet statistique analysant les données PISA, les variables d'intérêt étudiées se divisent en deux grandes catégories principales : celles liées aux technologies et leurs utilisations, et celles mesurant les performances éducatives.
 
-1.  Les variables liées aux technologies et à leurs utilisations.
+**Les variables liées aux technologies et à l'équipement** Ce groupe permet de quantifier l'accès matériel, ainsi que la fréquence, le contexte (école ou domicile) et le but (apprentissage ou loisir) de l'utilisation des outils numériques.
 
-Ce groupe de variables permet de quantifier la fréquence, le contexte (école ou domicile) et le but (apprentissage ou loisir) de l'utilisation des outils numériques par les élèves.
+\* `internet_access_available` : Indique si l'élève a accès à Internet chez lui.
 
-ST326Q01JA (digital_resources_usage_for_learning_at_school_by_day) : Mesure l'utilisation quotidienne de ressources numériques pour l'apprentissage à l'école.
+\* `computer_for_work_available` : Indique si un ordinateur est disponible pour le travail scolaire à domicile.
 
-ST326Q02JA (digital_resources_usage_for_learning_outside_school_by_day) : Mesure l'utilisation quotidienne de ressources numériques pour l'apprentissage en dehors de l'école.
+\* `educational_apps_available` : Indique la présence d'applications éducatives au domicile.
 
-ST326Q03JA (digital_resources_usage_for_learning_on_weekends) : Mesure l'utilisation de ressources numériques pour l'apprentissage pendant le week-end.
+\* `nb_digital_devices_at_home` : Quantifie le nombre total d'appareils numériques disponibles au domicile.
 
-ST326Q04JA (digital_resources_usage_for_leisure_at_school_by_day) : Mesure l'utilisation quotidienne de ressources numériques pour les loisirs à l'école.
+\* `digital_resources_usage_for_learning_at_school_by_day` : Fréquence d'utilisation de ressources numériques pour l'apprentissage à l'école.
 
-ST326Q05JA (digital_resources_usage_for_leisure_outside_school_by_day) : Mesure l'utilisation quotidienne de ressources numériques pour les loisirs en dehors de l'école.
+\* `digital_resources_usage_for_learning_outside_school_by_day` : Fréquence d'utilisation de ressources numériques pour l'apprentissage hors de l'école (en semaine).
 
-ST326Q06JA (digital_resources_usage_for_leisure_on_weekends) : Mesure l'utilisation de ressources numériques pour les loisirs pendant le week-end.
+\* `digital_resources_usage_for_learning_on_weekends` : Fréquence d'utilisation de ressources numériques pour l'apprentissage le week-end.
 
-ST253Q01JA (nb_digital_devices_at_home) : Quantifie le nombre d'appareils numériques disponibles au domicile de l'élève.
+\* `digital_games_usage_for_learning` : Fréquence d'utilisation de jeux numériques à des fins éducatives.
 
-IC174Q10JA (digital_games_usage_for_learning) : Évalue l'utilisation de jeux numériques à des fins éducatives.
+\* `digital_resources_usage_for_leisure_at_school_by_day` : Fréquence d'utilisation de ressources numériques pour les loisirs à l'école.
 
-2.  Les variables liées aux performances éducatives.
+\* `digital_resources_usage_for_leisure_outside_school_by_day` : Fréquence d'utilisation de ressources numériques pour les loisirs hors de l'école (en semaine).
 
-Ces variables servent à évaluer la réussite et le parcours scolaire des élèves évalués par l'OCDE.
+\* `digital_resources_usage_for_leisure_on_weekends` : Fréquence d'utilisation de ressources numériques pour les loisirs le week-end.
 
-PV1MATH (pv_math) : Le score de l'élève dans le domaine de la culture mathématique.
+**Les variables de performance et de contrôle** Ces variables servent à évaluer la réussite scolaire des élèves et à contrôler les biais sociodémographiques.
 
-PV1READ (pv_reading_comprehension) : Le score de l'élève en compréhension de l'écrit (lecture).
+\* `pv_math` : Score de l'élève en culture mathématique.
 
-PV1SCIE (pv_science) : Le score de l'élève dans le domaine de la culture scientifique.
+\* `pv_reading_comprehension` : Score de l'élève en compréhension de l'écrit.
 
-REPEAT (repeated_a_year) : Indique si l'élève a redoublé une année au cours de sa scolarité .
+\* `pv_science` : Score de l'élève en culture scientifique.
 
-Concernant le traitement des non-réponses, nous avons fait le choix d'exclure les observations manquantes lors des modélisations et analyses multivariées. Cela garantit que nos comparaisons reposent systématiquement sur des profils d'élèves complets vis-à-vis des variables étudiées.
+\* `country` : Pays d'origine de l'élève (code à 3 lettres).
+
+\* `index_socioeconomic_status` : Indice de statut économique, social et culturel (ESCS).
+
+\* `gender` : Sexe de l'élève.
+
+\* `birth_year` : Année de naissance.
+
+\* `academic_lvl` : Niveau d'étude ou classe actuelle de l'élève (Grade).
 
 ## 0.2 L'accès matériel : une fracture résorbée ?
 
@@ -850,6 +858,7 @@ ggplot(synthese_graphique_mixte, aes(x = Frequence, y = Note_Moyenne, color = Ty
     plot.caption = element_text(hjust = 0, face = "italic", color = "grey40", size = 9)
   )
 ```
+
 ```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 # Graphique : Usage Loisir par Sexe
 df_loisir_sexe <- responses %>%
@@ -911,6 +920,7 @@ ggplot(synthese_loisir_sexe, aes(x = Frequence, y = Note_Moyenne, color = Activi
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
 ```
+
 ```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 # Graphique : Évolution Loisirs vs Jeux selon la Classe
 df_loisir_niveau <- responses %>%
@@ -966,6 +976,7 @@ ggplot(synthese_loisir_niveau, aes(x = Frequence, y = Note_Moyenne, color = Cate
   theme_minimal(base_size = 13) +
   theme(legend.position = "right", plot.title = element_text(face = "bold"))
 ```
+
 ```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 #| label: fig-loisirs-ecole-vs-hors-ecole-integral
 #| fig-cap: "Impact différencié des loisirs numériques selon le contexte et le niveau scolaire"
@@ -1063,6 +1074,7 @@ ggplot(synthese_loisir_classe, aes(
     legend.box = "vertical"
   )
 ```
+
 ```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}{r}
 #| label: fig-comparaison-disciplines-loisirs-ecole
 #| fig-cap: "Impact de l'usage récréatif à l'école selon la discipline et le niveau scolaire"
