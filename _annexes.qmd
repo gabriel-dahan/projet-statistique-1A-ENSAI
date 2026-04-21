@@ -1,0 +1,411 @@
+```{r}
+
+```
+
+```{r}
+
+```
+
+## ACM des variables d'intérêt
+
+```{r}
+#| label: fig-acm-quali
+#| fig-cap: "Plan factoriel de l'Analyse des Correspondances Multiples (ACM)"
+
+library(FactoMineR)
+library(factoextra)
+library(tidyverse)
+
+donnees_acm <- responses |>
+  select(gender, computer_for_work_available, 
+         educational_apps_available, internet_access_available) |>
+  drop_na() |>
+  mutate(
+    Genre = ifelse(gender == 1, "Fille", "Garçon"),
+    Ordi = ifelse(computer_for_work_available == 1, "Ordi_Oui", "Ordi_Non"),
+    Apps = ifelse(educational_apps_available == 1, "Apps_Oui", "Apps_Non"),
+    Internet = ifelse(internet_access_available == 1, "Net_Oui", "Net_Non")
+  ) |>
+  # On place 'Genre' en première position pour s'en servir comme variable supplémentaire
+  select(Genre, Ordi, Apps, Internet) |>
+  mutate(across(everything(), as.factor))
+
+# quali.sup = 1 indique que la 1ère colonne (Genre) ne construit pas les axes, elle est projetée a posteriori.
+res.mca <- MCA(donnees_acm, quali.sup = 1, graph = FALSE)
+
+fviz_mca_var(res.mca, 
+             repel = TRUE, 
+             col.var = "cos2", 
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             title = "Profils de genre projetés sur l'équipement numérique") +
+  theme_minimal()
+```
+
+**Axe 1** : La première dimension oppose diamétralement les élèves équipés (regroupement des modalités Ordi_Oui, Net_Oui, Apps_Oui sur la gauche) aux élèves non équipés (regroupement de Net_Non, Ordi_Non, Apps_Non sur la droite). La position très excentrée du bloc "Non" souligne que l'absence d'équipement est un profil minoritaire mais aux caractéristiques très marquées par rapport à la norme (le côté "Oui", plus proche de l'origine).
+
+**Axe 2** : La seconde dimension est exclusivement construite par la variable du sexe, opposant très nettement la modalité Fille à la modalité Garçon. Le rouge vif indique une représentation parfaite.
+
+L'élément remarquable de cette analyse est dans la position des modalités Fille et Garçon par rapport à l'axe horizontal. Ces deux points se situent presque exactement sur le zéro de la Dim. 1. Sur le plan statistique, il y a donc indépendance totale entre le sexe et le niveau d'équipement matériel. Autrement dit, les garçons et les filles ont une probabilité équivalente d'être équipés ou non en outils numériques à la maison.
+
+## Distribution des scores des élèves
+
+```{r}
+#| label: fig-distrib-scores
+#| fig-cap: "Distribution des scores des élèves en Mathématiques, Sciences et Compréhension écrite"
+
+graph1_var <- interest_var %>%
+  select(pv_math, pv_reading_comprehension,pv_science) %>%
+  pivot_longer(
+    cols = everything(), 
+    names_to = "Matieres", 
+    values_to = "Note"
+  )
+
+ggplot(graph1_var, aes(x = Note, fill = Matieres, color = Matieres)) + 
+  geom_density(alpha = 0.3, linewidth = 1) +
+  
+  scale_fill_manual(
+    name = "Discipline",
+    values = c(
+      "pv_math" = "#D55E00",                
+      "pv_reading_comprehension" = "#0072B2", 
+      "pv_science" = "#009E73"             
+    ),
+    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
+  ) +
+  
+  scale_color_manual(
+    name = "Discipline",
+    values = c(
+      "pv_math" = "#D55E00", 
+      "pv_reading_comprehension" = "#0072B2", 
+      "pv_science" = "#009E73"
+    ),
+    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
+  ) +
+  
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 0.1), 
+    name = "Densité de probabilité"
+  ) +
+  
+  labs(
+    title = "Distribution des scores PISA par discipline",
+    x = "Score PISA",
+    caption = "Source : Enquête PISA"
+  ) +
+  
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top",
+    panel.grid.minor = element_blank(), 
+    axis.text.y = element_text(color = "gray40")
+  )
+```
+
+Les scores des trois disciplines suivent une répartition gaussienne classique : le fait le plus marquant est la superposition presque parfaite des trois courbes. Cela indique que le niveau de difficulté global et la notation des tests PISA sont très bien étalonnés d'une matière à l'autre.
+
+Bien que les trois courbes se superposent au niveau global, le graphique ne nous dit absolument pas si un élève excellent en mathématiques est le même que celui qui excelle en sciences. Il affiche des moyennes de groupes, pas des profils individuels : c'est la raison pour laquelle nous introduisons dans la partie 1 l'Alpha de Conbach.
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
+# Graphique : Usage Loisir par Sexe
+df_loisir_sexe <- responses %>%
+  select(
+    pv_mean, 
+    gender,
+    digital_games_usage_for_learning, # Conservé comme point de référence
+    digital_resources_usage_for_leisure_at_school_by_day, # À vérifier dans ton DF
+    digital_resources_usage_for_leisure_on_weekends, 
+    digital_resources_usage_for_leisure_outside_school_by_day 
+  ) %>% 
+  mutate(
+    digital_games_usage_for_learning = case_when(
+      !is.na(digital_games_usage_for_learning) ~ 
+        1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1),
+      TRUE ~ NA_real_
+    )) %>% 
+  pivot_longer(
+    cols = -c(pv_mean, gender), 
+    names_to = "Type_Activite", 
+    values_to = "Frequence"
+  ) %>%
+  filter(!is.na(Frequence), !is.na(pv_mean), !is.na(gender))
+
+synthese_loisir_sexe <- df_loisir_sexe %>%
+  mutate(Sexe = ifelse(gender == 1, "Filles", "Garçons")) %>%
+  mutate(Activity_Label = case_when(
+    Type_Activite == "digital_games_usage_for_learning" ~ "Jeux numériques éducatifs",
+    Type_Activite == "digital_resources_usage_for_leisure_at_school_by_day" ~ "Loisirs à l'école (semaine)",
+    Type_Activite == "digital_resources_usage_for_leisure_on_weekends" ~ "Loisirs (week-end)",
+    Type_Activite == "digital_resources_usage_for_leisure_outside_school_by_day" ~ "Loisirs hors école (semaine)",
+    TRUE ~ Type_Activite
+  )) %>%
+  group_by(Activity_Label, Frequence, Sexe) %>%
+  summarise(Note_Moyenne = mean(pv_mean, na.rm = TRUE), .groups = "drop")
+
+ggplot(synthese_loisir_sexe, aes(x = Frequence, y = Note_Moyenne, color = Activity_Label, group = Activity_Label)) +
+  geom_line(aes(linetype = (Activity_Label == "Jeux numériques éducatifs")), size = 1.1) +
+  geom_point(size = 2.5) +
+  facet_wrap(~ Sexe, ncol = 2) + 
+  scale_color_manual(
+    values = c(
+      "Jeux numériques éducatifs" = "#D55E00",
+      "Loisirs à l'école (semaine)" = "#0072B2",
+      "Loisirs (week-end)" = "#009E73",
+      "Loisirs hors école (semaine)" = "#CC79A7"
+    )
+  ) +
+  scale_linetype_manual(values = c("solid", "longdash"), guide = "none") +
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_continuous(breaks = seq(380, 500, 20), limits = c(380, 500)) + # Élargi car le loisir descend plus bas
+  labs(
+    title = "Impact des loisirs numériques sur la performance selon le sexe",
+    subtitle = "Comparaison de l'usage récréatif et des jeux éducatifs",
+    x = "Fréquence d'utilisation (Échelle normalisée 1-9)",
+    y = "Score Moyen PISA",
+    color = "Nature de l'usage"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
+```
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
+# Graphique : Évolution Loisirs vs Jeux selon la Classe
+df_loisir_niveau <- responses %>%
+  select(
+    pv_mean,
+    academic_lvl, 
+    digital_games_usage_for_learning,
+    digital_resources_usage_for_leisure_at_school_by_day,
+    digital_resources_usage_for_leisure_on_weekends,
+    digital_resources_usage_for_leisure_outside_school_by_day
+  ) %>%
+  mutate(
+    digital_games_usage_for_learning = 1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1)
+  ) %>%
+  pivot_longer(
+    cols = -c(pv_mean, academic_lvl),
+    names_to = "Type_Activite",
+    values_to = "Frequence"
+  )
+
+synthese_loisir_niveau <- df_loisir_niveau %>%
+  filter(!is.na(Frequence), !is.na(pv_mean), !is.na(academic_lvl)) %>%
+  mutate(academic_lvl = as.numeric(as.character(academic_lvl))) %>%
+  filter(academic_lvl >= 7 & academic_lvl <= 12) %>% 
+  mutate(
+    Categorie = if_else(
+      Type_Activite == "digital_games_usage_for_learning",
+      "Jeux numériques éducatifs",
+      "Loisirs numériques (Moyenne)"
+    ),
+    Classe = as.factor(academic_lvl) 
+  ) %>%
+  group_by(Classe, Categorie, Frequence) %>%
+  summarise(
+    Note_Moyenne = mean(pv_mean, na.rm = TRUE),
+    Nb_Eleves = n(), 
+    .groups = "drop"
+  ) %>%
+  filter(Nb_Eleves > 20)
+
+ggplot(synthese_loisir_niveau, aes(x = Frequence, y = Note_Moyenne, color = Categorie, shape = Classe, group = interaction(Categorie, Classe))) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c("Jeux numériques éducatifs" = "#D55E00", "Loisirs numériques (Moyenne)" = "#0072B2")) +
+  facet_wrap(~ Categorie) +
+  labs(
+    title = "Réactivité aux loisirs numériques selon le niveau scolaire",
+    subtitle = "Les classes supérieures montrent une plus forte amplitude de variation",
+    x = "Fréquence (1 = Faible, 9 = Intensive)",
+    y = "Score Moyen PISA",
+    shape = "Grade"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "right", plot.title = element_text(face = "bold"))
+```
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
+#| label: fig-loisirs-ecole-vs-hors-ecole-integral
+#| fig-cap: "Impact différencié des loisirs numériques selon le contexte et le niveau scolaire"
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# 1. PRÉPARATION ET AGRÉGATION DES DONNÉES
+# Nous isolons l'usage à l'école et créons une moyenne pour le hors école (week-end + semaine)
+df_graphique_loisir_final <- responses %>%
+  select(
+    pv_mean,
+    academic_lvl,
+    digital_resources_usage_for_leisure_at_school_by_day,       
+    digital_resources_usage_for_leisure_on_weekends,            
+    digital_resources_usage_for_leisure_outside_school_by_day  
+  ) %>%
+  mutate(
+    # Catégorie 1 : Usage perturbateur au sein de l'établissement [cite: 234, 241]
+    `Loisirs à l'école` = digital_resources_usage_for_leisure_at_school_by_day,
+    # Catégorie 2 : Agrégation des usages de socialisation/équilibre hors école [cite: 227, 231]
+    `Loisirs hors école (Agrégués)` = (digital_resources_usage_for_leisure_on_weekends + 
+                                       digital_resources_usage_for_leisure_outside_school_by_day) / 2
+  ) %>%
+  select(pv_mean, academic_lvl, `Loisirs à l'école`, `Loisirs hors école (Agrégués)`) %>%
+  pivot_longer(
+    cols = c(`Loisirs à l'école`, `Loisirs hors école (Agrégués)`),
+    names_to = "Contexte_Loisir",
+    values_to = "Frequence"
+  )
+
+# 2. SYNTHÈSE STATISTIQUE PAR CLASSE
+# Focus sur les Grades 7 à 12 pour observer la réactivité selon l'âge [cite: 193, 274]
+synthese_loisir_classe <- df_graphique_loisir_final %>%
+  filter(!is.na(Frequence), !is.na(pv_mean), !is.na(academic_lvl)) %>%
+  mutate(academic_lvl = as.numeric(as.character(academic_lvl))) %>%
+  filter(academic_lvl >= 7 & academic_lvl <= 12) %>% 
+  mutate(Classe = as.factor(academic_lvl)) %>%
+  group_by(Classe, Contexte_Loisir, Frequence) %>%
+  summarise(
+    Note_Moyenne = mean(pv_mean, na.rm = TRUE),
+    Nb_Eleves = n(),
+    .groups = "drop"
+  ) 
+  # Note : Nous avons retiré le filtre d'effectif minimum pour que les courbes du Grade 12 
+  # aillent jusqu'au bout de l'échelle d'utilisation.
+
+# 3. VISUALISATION FINALE
+ggplot(synthese_loisir_classe, aes(
+    x = Frequence, 
+    y = Note_Moyenne, 
+    color = Contexte_Loisir, 
+    shape = Classe, 
+    group = interaction(Contexte_Loisir, Classe)
+  )) +
+  
+  # Géométries
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  
+  # Séparation des deux contextes d'usage (Perturbateur vs Équilibre) [cite: 240, 241]
+  facet_wrap(~ Contexte_Loisir) +
+  
+  # Couleurs thématiques
+  scale_color_manual(values = c(
+    "Loisirs à l'école" = "#0072B2",             
+    "Loisirs hors école (Agrégués)" = "#CC79A7"  
+  )) +
+  
+  # Réglage précis des axes
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_continuous(breaks = seq(300, 550, 25)) + 
+  
+  # coord_cartesian permet de voir les scores élevés (Grade 12) sans couper les données [cite: 195, 274]
+  coord_cartesian(ylim = c(300, 550)) + 
+  
+  # Labels et mise en forme ENSAI
+  labs(
+    title = "Évolution de l'impact des loisirs numériques par classe",
+    subtitle = "Trajectoires complètes illustrant la vulnérabilité accrue des classes supérieures",
+    x = "Fréquence d'utilisation (1 = Très faible, 9 = Très intensive)",
+    y = "Score Moyen PISA",
+    shape = "Année d'étude",
+    color = "Contexte d'usage",
+    caption = "Source : Données PISA 2022 | Analyse des performances en Mathématiques, Sciences et Lecture"
+  ) +
+  
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", size = 14),
+    strip.text = element_text(face = "bold", size = 12),
+    panel.grid.minor = element_blank(),
+    legend.box = "vertical"
+  )
+```
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
+#| label: fig-comparaison-disciplines-loisirs-ecole
+#| fig-cap: "Impact de l'usage récréatif à l'école selon la discipline et le niveau scolaire"
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# 1. PRÉPARATION DES DONNÉES
+df_disciplines_comparaison <- responses %>%
+  select(
+    academic_lvl,
+    pv_math,
+    pv_reading_comprehension,
+    pv_science,
+    digital_resources_usage_for_leisure_at_school_by_day
+  ) %>%
+  # Transformation du format large au format long pour ggplot
+  pivot_longer(
+    cols = c(pv_math, pv_reading_comprehension, pv_science),
+    names_to = "Discipline",
+    values_to = "Score_PISA"
+  ) %>%
+  mutate(
+    Discipline = case_when(
+      Discipline == "pv_math" ~ "Mathématiques",
+      Discipline == "pv_reading_comprehension" ~ "Compréhension de l'écrit",
+      Discipline == "pv_science" ~ "Sciences"
+    ),
+    Frequence = digital_resources_usage_for_leisure_at_school_by_day
+  )
+
+# 2. SYNTHÈSE STATISTIQUE
+# On se concentre sur les Grades 9 à 12 pour observer la chute de performance
+synthese_disciplines <- df_disciplines_comparaison %>%
+  filter(!is.na(Frequence), !is.na(Score_PISA), !is.na(academic_lvl)) %>%
+  mutate(academic_lvl = as.numeric(as.character(academic_lvl))) %>%
+  filter(academic_lvl >= 9 & academic_lvl <= 12) %>%
+  mutate(Classe = as.factor(academic_lvl)) %>%
+  group_by(Discipline, Classe, Frequence) %>%
+  summarise(
+    Note_Moyenne = mean(Score_PISA, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 3. VISUALISATION FINALE
+ggplot(synthese_disciplines, aes(x = Frequence, y = Note_Moyenne, color = Discipline, group = interaction(Discipline, Classe))) +
+  
+  # Lignes et points
+  geom_line(aes(linetype = Classe), linewidth = 0.8) +
+  geom_point(size = 2) +
+  
+  # Séparation par discipline pour comparer les pentes
+  facet_wrap(~ Discipline) +
+  
+  # Couleurs distinctes pour les disciplines
+  scale_color_manual(values = c(
+    "Mathématiques" = "#D55E00", 
+    "Compréhension de l'écrit" = "#0072B2", 
+    "Sciences" = "#009E73"
+  )) +
+  
+  # Réglages des axes
+  scale_x_continuous(breaks = 1:9) +
+  coord_cartesian(ylim = c(350, 550)) +
+  
+  labs(
+    title = "Sensibilité disciplinaire à la distraction numérique à l'école",
+    subtitle = "Comparaison des trajectoires de performance (Grades 9 à 12)",
+    x = "Fréquence d'utilisation récréative à l'école (1-9)",
+    y = "Score Moyen PISA",
+    color = "Discipline",
+    linetype = "Année d'étude",
+    caption = "Source : Données PISA 2022 | Analyse comparative disciplinaire"
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.box = "vertical",
+    plot.title = element_text(face = "bold"),
+    strip.text = element_text(face = "bold", size = 11),
+    panel.grid.minor = element_blank()
+  )
+```

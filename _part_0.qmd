@@ -1,0 +1,181 @@
+## 0.1. Enquête PISA : présentation des données
+
+L'évaluation PISA est une vaste enquête menée sous l'égide de l'OCDE tous les trois ans depuis l'an 2000. Elle a pour objectif principal d'évaluer les compétences des élèves de 15 ans (qui arrivent généralement en fin de scolarité obligatoire) dans trois domaines fondamentaux : la compréhension de l'écrit, la culture mathématique et la culture scientifique.
+
+Contrairement à des évaluations classiques, PISA ne se concentre pas uniquement sur la restitution des programmes scolaires, mais évalue plutôt l'aptitude des élèves à raisonner, formuler, employer et interpréter des concepts pour résoudre des problèmes ancrés dans des situations du monde réel.
+
+L'édition de 2022 a impliqué 690 000 élèves issus de 81 pays. À chaque cycle, un domaine est évalué de manière plus poussée. En 2022, la priorité a été donnée à la culture mathématique. En France, environ 6 700 élèves ont été tirés au sort dans 285 établissements pour assurer une représentativité nationale . La majorité de ces élèves (64,2 %) étaient scolarisés en classe de seconde générale et technologique
+
+Le test se déroule sur ordinateur. Il est composé de plusieurs unités ancrées dans des contextes de la vie réelle (personnels, professionnels, sociétaux ou scientifiques) et propose différents formats de réponses, notamment des questions à choix multiple et des questions à réponse construite ouverte.En plus des compétences scolaires, PISA s'intéresse à l'environnement des élèves en récoltant des données sur leur accès aux équipements (comme les technologies numériques) et leur indice de statut économique, social et culturel afin d'analyser les facteurs modérateurs de la réussite.
+
+Dans le cadre du projet statistique analysant les données PISA, les variables d'intérêt étudiées se divisent en deux grandes catégories principales : celles liées aux technologies et leurs utilisations, et celles mesurant les performances éducatives.
+
+**Les variables liées aux technologies et à l'équipement** Ce groupe permet de quantifier l'accès matériel, ainsi que la fréquence, le contexte (école ou domicile) et le but (apprentissage ou loisir) de l'utilisation des outils numériques.
+
+\* `internet_access_available` : Indique si l'élève a accès à Internet chez lui.
+
+\* `computer_for_work_available` : Indique si un ordinateur est disponible pour le travail scolaire à domicile.
+
+\* `educational_apps_available` : Indique la présence d'applications éducatives au domicile.
+
+\* `nb_digital_devices_at_home` : Quantifie le nombre total d'appareils numériques disponibles au domicile.
+
+\* `digital_resources_usage_for_learning_at_school_by_day` : Fréquence d'utilisation de ressources numériques pour l'apprentissage à l'école.
+
+\* `digital_resources_usage_for_learning_outside_school_by_day` : Fréquence d'utilisation de ressources numériques pour l'apprentissage hors de l'école (en semaine).
+
+\* `digital_resources_usage_for_learning_on_weekends` : Fréquence d'utilisation de ressources numériques pour l'apprentissage le week-end.
+
+\* `digital_games_usage_for_learning` : Fréquence d'utilisation de jeux numériques à des fins éducatives.
+
+\* `digital_resources_usage_for_leisure_at_school_by_day` : Fréquence d'utilisation de ressources numériques pour les loisirs à l'école.
+
+\* `digital_resources_usage_for_leisure_outside_school_by_day` : Fréquence d'utilisation de ressources numériques pour les loisirs hors de l'école (en semaine).
+
+\* `digital_resources_usage_for_leisure_on_weekends` : Fréquence d'utilisation de ressources numériques pour les loisirs le week-end.
+
+**Les variables de performance et de contrôle** Ces variables servent à évaluer la réussite scolaire des élèves et à contrôler les biais sociodémographiques.
+
+\* `pv_math` : Score de l'élève en culture mathématique.
+
+\* `pv_reading_comprehension` : Score de l'élève en compréhension de l'écrit.
+
+\* `pv_science` : Score de l'élève en culture scientifique.
+
+\* `country` : Pays d'origine de l'élève (code à 3 lettres).
+
+\* `index_socioeconomic_status` : Indice de statut économique, social et culturel (ESCS).
+
+\* `gender` : Sexe de l'élève.
+
+\* `birth_year` : Année de naissance.
+
+\* `academic_lvl` : Niveau d'étude ou classe actuelle de l'élève (Grade).
+
+## 0.2 L'accès matériel : une fracture résorbée ?
+
+Avant de corréler l'usage du numérique aux performances académiques, il convient de dresser un état des lieux de l'accès matériel aux outils technologiques. L'analyse descriptive de la base de données PISA révèle une démocratisation de l'équipement de base. En observant la disponibilité d'une connexion internet, d'un ordinateur pour le travail et d'applications éducatives, on constate qu'une très vaste majorité d'élèves (plus de $85\%$ en moyenne globale) dispose de ces outils à domicile. Ce niveau d'équipement primaire confirme notre postulat initial : les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau. L'enjeu de l'inégalité se déplace vers la manière dont ce matériel est exploité par les élèves.
+
+```{r}
+#| label: tbl-acces-materiel
+#| fig-cap: "Proportion d'élèves ayant accès aux outils numériques de base à domicile"
+
+tableau_acces <- responses %>%
+  select(internet_access_available, computer_for_work_available, educational_apps_available) %>%
+  pivot_longer(cols = everything(), 
+               names_to = "Equipement", 
+               values_to = "Reponse") %>%
+  drop_na() %>%
+  mutate(Equipement = case_when(
+    Equipement == "internet_access_available" ~ "Accès Internet",
+    Equipement == "computer_for_work_available" ~ "Ordinateur de travail",
+    Equipement == "educational_apps_available" ~ "Applications éducatives"
+  )) %>%
+  count(Equipement, Reponse) %>%
+  group_by(Equipement) %>%
+  mutate(Pourcentage = round((n / sum(n)) * 100, 1)) %>%
+  ungroup() %>%
+  filter(Reponse == 1) %>%
+  mutate(Pourcentage = paste0(Pourcentage, " %")) %>%
+  select(Equipement, Pourcentage)
+
+flextable(tableau_acces) %>%
+  set_header_labels(
+    Equipement = "Type d'équipement", 
+    Pourcentage = "Pourcentage d'élèves"
+  ) %>%
+  add_footer_lines("Source : PISA 2022 | Champ : Élèves de 15 ans des 81 pays participants") %>%
+  theme_vanilla() %>%
+  autofit() %>%
+  align(align = "center", part = "all") %>%
+  align(j = 1, align = "left", part = "all")
+```
+
+## 0.3. La cartographie mondiale des usages
+
+Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique de ces outils varie d'un système éducatif à l'autre. La cartographie de l'utilisation moyenne des ressources numériques à l'école met en évidence des clivages géographiques majeurs (@fig-carte-usage). Ces disparités nationales rappellent que l'accès au numérique est avant tout le fruit de politiques éducatives, offrant ainsi un cadre très hétérogène à l'évaluation des performances.
+
+```         
+```
+
+```{r, warning=FALSE, results='hide'}
+#| label: fig-carte-usage
+#| fig-cap: "Intensité moyenne d'utilisation des ressources numériques à l'école par pays"
+
+usage_ecole_pays <- responses %>%
+  group_by(country) %>%
+  summarise(usage_moyen_ecole = mean(digital_resources_usage_for_learning_at_school_by_day, na.rm = TRUE)) %>%
+  drop_na(usage_moyen_ecole) %>%
+  # LE TRADUCTEUR EST ICI : On renomme les codes PISA pour qu'ils matchent avec la carte
+  mutate(country = case_when(
+    country == "KSV" ~ "KOS", # Kosovo
+    country == "PSE" ~ "PSX", # Palestine
+    country == "QAZ" ~ "AZE", # Azerbaïdjan (Baku)
+    country == "QUR" ~ "UKR", # Ukraine
+    country == "TAP" ~ "TWN", # Taïwan
+    TRUE ~ country            # On ne touche pas aux autres
+  ))
+
+# 2. Chargement de la carte
+monde <- ne_countries(scale = "medium", returnclass = "sf")
+
+# 3. Jointure des données avec la carte
+carte_usage <- monde %>%
+  left_join(usage_ecole_pays, by = c("adm0_a3" = "country"))
+
+# 4. Tracé de la carte
+ggplot(data = carte_usage) +
+  geom_sf(aes(fill = usage_moyen_ecole), color = "white", linewidth = 0.1) +
+  scale_fill_viridis_c(
+    option = "magma",
+    na.value = "lightgray",
+    name = "Fréquence moyenne\n(Échelle 1-9)"
+  ) +
+  labs(
+    title = "Utilisation des ressources numériques à l'école",
+    subtitle = "Fréquence moyenne déclarée par les élèves (PISA 2022)",
+    caption = "Source : Données PISA 2022 \nChamp : Élèves de 15 ans des 81 pays participants \nNote de lecture : Plus la couleur est claire, plus l'utilisation est fréquente."
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid = element_blank()
+  )
+```
+
+## 0.4. Un poids du statut socio-économique sur le suréquipement
+
+Si la fracture d'accès primaire se réduit, l'indice de statut économique, social et culturel (ESCS) demeure un puissant déterminant du niveau d'équipement technologique. L'analyse du volume d'appareils numériques au sein du foyer selon les quartiles socio-économiques montre une corrélation directe. Le passage à une représentation en histogramme cumulé met en lumière que près de la moitié des élèves du quartile le plus favorisé (Q4) possèdent plus de 6 appareils à domicile, contre une très faible proportion dans le quartile le plus modeste. Cette abondance matérielle dans les milieux aisés confirme que l'enjeu ne réside potentiellement plus dans le manque d'outils, mais dans la surexposition (\@fig-escs-equipement).
+
+```{r}
+#| label: fig-escs-equipement
+#| fig-cap: "Répartition du volume d'équipement numérique au domicile selon le quartile socio-économique (ESCS)"
+
+responses_escs <- responses %>%
+  drop_na(index_socioeconomic_status, nb_digital_devices_at_home) %>%
+  mutate(
+    ESCS_quartile = ntile(index_socioeconomic_status, 4),
+    ESCS_quartile = factor(ESCS_quartile, labels = c("Q1 (Modeste)", "Q2", "Q3", "Q4 (Favorisé)")),
+    Classe_Equipement = case_when(
+      nb_digital_devices_at_home <= 3 ~ "1 à 3 appareils",
+      nb_digital_devices_at_home <= 6 ~ "4 à 6 appareils",
+      TRUE ~ "Plus de 6 appareils"
+    ),
+    Classe_Equipement = factor(Classe_Equipement, levels = c("1 à 3 appareils", "4 à 6 appareils", "Plus de 6 appareils"))
+  )
+
+ggplot(responses_escs, aes(x = ESCS_quartile, fill = Classe_Equipement)) +
+  geom_bar(position = "fill", color = "white", alpha = 0.85) +
+  scale_fill_brewer(palette = "Blues") +
+  scale_y_continuous(labels = percent_format()) +
+  labs(
+    title = "Volume d'équipement numérique selon le milieu social",
+    x = "Indice socio-économique (quartiles ESCS)",
+    y = "Proportion d'élèves",
+    fill = "Nombre d'appareils à domicile",
+    caption = "Source : PISA 2022 \nChamp : Élèves de 15 ans \nLecture : Près de la moitié des élèves du Q4 possèdent plus de 6 appareils."
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```

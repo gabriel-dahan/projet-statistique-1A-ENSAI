@@ -1,0 +1,190 @@
+## 1.1. Méthodologie : Construction d'un indicateur multidimensionnel
+
+L'Alpha de Cronbach est un indicateur statistique (variant de $0$ à $1$) qui mesure la fiabilité et la cohérence interne d'un ensemble de variables censées évaluer un même concept latent. Un score supérieur à $0.7$ est généralement considéré comme satisfaisant, signifiant que les variables évoluent conjointement de manière fiable.
+
+Afin de vérifier la pertinence de la création d'un indicateur unique de performance, nous avons calculé l'Alpha de Cronbach. Le test révèle une cohérence interne très élevée ($\alpha > 0.93$) et une corrélation inter-items forte ($r \approx 0.90$), justifiant ainsi l'agrégation des scores de mathématiques, sciences et compréhension de l'écrit en une variable composite unique.
+
+```{r}
+#| label: tbl-alpha-cronbach
+#| fig-cap: "Alpha de Conbach et corrélation des scores"
+table1 <- data.frame(
+  Discipline = c("Mathématiques", "Compréhension de l'écrit", "Sciences"),
+  Alpha = c(0.95, 0.96, 0.93),         
+  Correlation = c(0.90, 0.93, 0.88)     
+)
+
+ft <- table1 %>%
+  flextable() %>%
+  
+  set_header_labels(
+    Alpha = "Alpha de Cronbach (α)",
+    Correlation = "Corrélation Moyenne (r)"
+  ) %>%
+  
+  autofit() %>%
+  
+ 
+  align(j = 2:3, align = "center", part = "all") %>%
+  
+ 
+  set_caption("Tableau 1 : Indices de cohérence interne et corrélations des disciplines PISA") %>%
+  
+
+  theme_booktabs() %>%
+  
+  
+  bold(part = "header")
+
+ft
+```
+
+```{r}
+responses <- responses %>%
+  rowwise() %>%
+  mutate(pv_mean = mean(c(pv_math, pv_reading_comprehension, pv_science), na.rm = TRUE))
+```
+
+```{r,results='hide'}
+interest_var <- interest_var %>%
+  rowwise() %>%
+  mutate(pv_mean = mean(c(pv_math, pv_reading_comprehension, pv_science), na.rm = TRUE))
+```
+
+```{r,results='hide'}
+explicative_var <- responses %>% select(digital_resources_usage_for_learning_at_school_by_day,
+                                        digital_resources_usage_for_learning_outside_school_by_day,
+                                        digital_resources_usage_for_learning_on_weekends,
+                                        digital_games_usage_for_learning)
+```
+
+```{r, warning=FALSE, results='hide'}
+data_propre <- explicative_var %>%
+  mutate(across(everything(), as.numeric)) %>%
+  tidyr::drop_na() %>% 
+  as.data.frame()       
+
+resultat_alpha <- psych::alpha(data_propre, check.keys = TRUE)
+
+print(resultat_alpha$total$std.alpha)
+print(resultat_alpha$alpha.drop)
+```
+
+### Différence entre deux types de technologie.
+
+L'étude de la cohérence interne des usages numériques liés à l'apprentissage révèle une hétérogénéité des pratiques. Si l'Alpha de Cronbach global de l'échelle est modeste ($0,57$), l'analyse détaillée est éclairante. L'Alpha « en cas de suppression » permet d'identifier si une variable perturbe la cohérence globale : si l'indice augmente de façon importante lorsqu'on retire une variable, cela signifie qu'elle ne mesure pas la même dimension que les autres. Ici, l'item relatif aux jeux numériques éducatifs agit comme un facteur de dissonance. Son retrait permettrait à lui seul de porter la fiabilité de l'échelle des ressources classiques à $0,68$. Cette divergence statistique nous conduit à traiter séparément deux dimensions de l'usage numérique : d'une part, les ressources pédagogiques structurées (manuels, articles, logiciels de cours) et d'autre part, la gamification de l'apprentissage, dont l'influence sur les scores PISA suit une trajectoire
+
+```{r}
+#| label: tbl-alpha-cronbach-si-retrait
+#| fig-cap: "Alpha de Cronbach sur les jeux et ressources éducatives"
+
+tab_fiabilite_2 <- data.frame(
+  Indicateur = c(
+    "Ressources à l'école (semaine)",
+    "Ressources hors école (semaine)",
+    "Ressources (week-end)",
+    "Jeux numériques éducatifs"
+  ),
+  Alpha_si_supprime = c(0.48, 0.35, 0.43, 0.68) 
+)
+
+ft_2 <- flextable(tab_fiabilite_2) %>%
+  set_header_labels(
+    Indicateur = "Usage numérique",
+    Alpha_si_supprime = "Alpha de Cronbach (si retrait)"
+  ) %>%
+  theme_booktabs() %>%
+  autofit() %>%
+  bold(i = 4) %>%
+  color(i = 4, color = "darkred") %>%
+  add_footer_lines("Alpha global : 0,575 | Source : Données PISA") %>%
+  set_caption("Tableau 2 : Test de cohérence des indicateurs d'apprentissage numérique")
+
+ft_2
+```
+
+## 1.2. L'existence d'un seuil au delà duquel les technologies sont contre-productives
+
+### Analyse de la courbe
+
+L'analyse des données de l'enquête PISA met en évidence une relation en « U inversé » entre la fréquence d'utilisation des ressources numériques pédagogiques et le score moyen des élèves en mathématiques, sciences et compréhension de l'écrit. Si une utilisation modérée des outils numériques, tant à l'école qu'en dehors, semble corrélée à une amélioration des performances, un effet de saturation apparaît au-delà d'un certain seuil d'intensité. Le point d'inflexion se situe autour du niveau 4 (correspondant à une utilisation modérée) sur l'échelle de fréquence normalisée : à ce stade, les élèves obtiennent les scores les plus élevés, atteignant en moyenne près de 470 points. Passé ce seuil, on observe un décrochage significatif de la performance, le score moyen chutant sous les 430 points pour les utilisateurs les plus intensifs (niveau 8 et 9).
+
+Il convient toutefois de distinguer la nature des activités numériques. L'usage des jeux vidéo à des fins éducatives présente une trajectoire singulière : il ne bénéficie pas de la même dynamique de progression initiale que les autres ressources pédagogiques et décline de manière plus linéaire à mesure que la fréquence augmente. Cette distinction est confirmée par les tests de cohérence interne (Alpha de Cronbach de 0,68 après retrait de la variable), suggérant que les pratiques de « gamification » constituent une dimension comportementale distincte de l'usage des ressources numériques classiques dans le processus d'apprentissage.
+
+```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
+#| label: fig-relation-freq-usage-perf-scolaire
+#| fig-cap: "Relation entre fréquence d'usage des technologies et les performances scolaires"
+
+explicative_interest_var <- bind_cols(explicative_var, interest_var)
+df_graphique <- explicative_interest_var %>%
+  mutate(
+    digital_games_usage_for_learning = case_when(
+      !is.na(digital_games_usage_for_learning) ~ 
+        1 + (digital_games_usage_for_learning - 1) * (9 - 1) / (5 - 1),
+      TRUE ~ NA_real_
+    )
+  )
+
+df_graphique <- df_graphique %>%
+  select(
+    pv_mean,
+    digital_games_usage_for_learning, 
+    digital_resources_usage_for_learning_at_school_by_day,
+    digital_resources_usage_for_learning_on_weekends, 
+    digital_resources_usage_for_learning_outside_school_by_day 
+  ) %>%
+  pivot_longer(
+    cols = -pv_mean, 
+    names_to = "Type_Activite", 
+    values_to = "Frequence"
+  ) %>%
+  filter(!is.na(Frequence), !is.na(pv_mean))
+
+synthese_graphique <- df_graphique %>%
+  group_by(Type_Activite, Frequence) %>%
+  summarise(Note_Moyenne = mean(pv_mean, na.rm = TRUE), .groups = "drop")
+
+labels_activites <- c(
+  "digital_games_usage_for_learning" = "Jeux numériques éducatifs",
+  "digital_resources_usage_for_learning_at_school_by_day" = "Ressources à l'école (semaine)",
+  "digital_resources_usage_for_learning_on_weekends" = "Ressources (week-end)",
+  "digital_resources_usage_for_learning_outside_school_by_day" = "Ressources hors école (semaine)"
+)
+
+
+ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Type_Activite, group = Type_Activite)) +
+  
+  geom_line(aes(linetype = (Type_Activite == "digital_games_usage_for_learning")), size = 1.1, alpha = 0.8) +
+  geom_point(size = 3) +
+  
+  scale_color_manual(
+    values = c("#D55E00", "#0072B2", "#009E73", "#CC79A7"),
+    labels = labels_activites
+  ) +
+  scale_linetype_manual(values = c("solid", "longdash"), guide = "none") + # Pointillés pour les jeux
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_continuous(breaks = seq(420, 480, 10)) +
+  coord_cartesian(ylim = c(420, 485)) + 
+  
+  labs(
+    title = "Relation entre fréquence d'usage numérique\net performance scolaire",
+    subtitle = "Moyenne des scores PISA (Maths, Sciences, Lecture) selon l'intensité d'utilisation",
+    x = "Fréquence d'utilisation (Échelle normalisée de 1 à 9)",
+    y = "Score Moyen PISA",
+    color = "Type d'activité numérique",
+    caption = "Source : Données PISA 2022 | Champ : Élèves de 15 ans des 81 pays \nNote de lecture : L'usage des jeux (en pointillés) présente une baisse quasi continue."
+  ) +
+  
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "vertical",
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(margin = margin(b = 15)),
+    panel.grid.minor = element_blank(),
+    axis.title = element_text(face = "bold"),
+    plot.caption = element_text(hjust = 0, face = "italic", color = "grey40", size = 9),
+    
+  )
+```
+
+Il est important de préciser en préambule que l'échelle de fréquence utilisée en abscisse (de 1 à 9) correspond aux modalités brutes du questionnaire PISA (allant de « Jamais » à « Tous les jours »). Aucun traitement ni recodage n'a été effectué sur ces données de fréquence de notre part, à l'exception des jeux numériques dont l'échelle originelle, qui était de 1 à 5, a été mathématiquement normalisée sur 9 niveaux afin de permettre une stricte comparabilité visuelle sur un même graphique.
