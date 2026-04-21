@@ -134,7 +134,7 @@ df_barres <- responses %>%
 ggplot(df_barres, aes(x = factor(Modalite), fill = Sexe)) +
   geom_bar(position = "fill", width = 0.7, alpha = 0.9) + 
   
-  scale_fill_manual(values = c("Filles" = "#CC79A7", "Garçons" = "#0072B2")) +
+  scale_fill_manual(values = c("Filles" = "#fc2d3b", "Garçons" = "#0072B2")) +
   
   scale_y_continuous(labels = percent_format()) + 
   
