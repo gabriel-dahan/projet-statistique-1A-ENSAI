@@ -859,6 +859,410 @@ ggplot(synthese_graphique_mixte, aes(x = Frequence, y = Note_Moyenne, color = Ty
   )
 ```
 
+
+
+
+
+Au terme de cette analyse, il apparaît que les approches bivariées, bien qu'essentielles pour identifier la relation en « U inversé » entre le numérique et les scores PISA , ne suffisent pas à saisir l'entière complexité des trajectoires individuelles des élèves. La réussite éducative ne dépend pas d'un facteur isolé, mais d'un système d'interactions complexes entre l'intensité d'usage, la nature de l'activité pédagogique ou récréative et le contexte spatial de consommation, qu'il soit scolaire ou domestique . L’Analyse des Correspondances Multiples (ACM) s’impose alors comme l’outil de synthèse idéal pour cartographier ces interactions au sein d’un espace factoriel unique, permettant de dépasser l'opposition binaire entre technophiles et technophobes pour identifier les conditions réelles d'un dosage numérique optimal . Afin de garantir une lisibilité statistique rigoureuse, nous avons fait le choix de discrétiser les échelles de fréquence initiales en trois modalités (Faible, Modéré et Intensif) et de projeter, en variables illustratives, le statut socio-économique (ESCS) ainsi que la performance scolaire découpée en quartiles (Q1 à Q4) . Cette démarche vise à vérifier si l'excellence académique, représentée par notre indicateur multidimensionnel dont la cohérence interne a été validée ($\alpha > 0,93$), gravite effectivement autour d'un pôle de régulation des usages plutôt que vers l'abstinence ou l'hyper-connexion . Le plan factoriel qui suit oppose ainsi une Dimension 1 caractérisant l'intensité globale d'équipement et d'usage à une Dimension 2 révélant la qualité du dosage numérique, mettant notamment en exergue la toxicité particulière des loisirs intensifs au sein de l'établissement . En définitive, cette carte statistique constitue la preuve visuelle que la fracture numérique contemporaine ne réside plus dans le manque de matériel, mais bien dans la maîtrise comportementale de l'outil comme levier d'apprentissage .
+
+```{r}
+#| label: acm-charte-graphique
+#| fig-width: 12
+#| fig-height: 9
+
+library(FactoMineR)
+library(factoextra)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# --- 1. PRÉPARATION ---
+set.seed(42)
+data_acm <- responses %>%
+  ungroup() %>% 
+  slice_sample(n = 20000) %>%
+  mutate(Score_PISA = (pv_math + pv_reading_comprehension + pv_science) / 3) %>%
+  mutate(Perf_Quartile = factor(ntile(Score_PISA, 4), 
+                                labels = c("Q1 (Faible)", "Q2 (Moyen)", "Q3 (Bon)", "Q4 (Excellent)"))) %>%
+  select(
+    Lrn_Sch = digital_resources_usage_for_learning_at_school_by_day,
+    Lrn_Out = digital_resources_usage_for_learning_outside_school_by_day,
+    Lei_Sch = digital_resources_usage_for_leisure_at_school_by_day,
+    Lei_Out = digital_resources_usage_for_leisure_outside_school_by_day,
+    Lei_Wkd = digital_resources_usage_for_leisure_on_weekends,
+    ESCS = index_socioeconomic_status,
+    Perf_Quartile
+  ) %>%
+  mutate(across(starts_with(c("Lrn", "Lei")), ~ factor(case_when(
+    .x <= 2 ~ "Faible",
+    .x >= 3 & .x <= 6 ~ "Modéré",
+    .x >= 7 ~ "Intensif"
+  ), levels = c("Faible", "Modéré", "Intensif")))) %>%
+  drop_na()
+
+# --- 2. ACM ---
+res.mca <- MCA(data_acm, 
+               quanti.sup = which(names(data_acm) == "ESCS"),
+               quali.sup = which(names(data_acm) == "Perf_Quartile"), 
+               graph = FALSE)
+
+# --- 3. COULEURS HARMONISÉES ---
+# On suit ta charte : Bleu (Compréhension/Learning), Orange (Maths/Leisure Sch), Vert (Sciences/Leisure Out)
+couleurs_vars <- c(
+  rep("#2980B9", 3), # Lrn_Sch : Bleu soutenu
+  rep("#AED6F1", 3), # Lrn_Out : Bleu ciel
+  rep("#E67E22", 3), # Lei_Sch : Orange (Maths dans ton graph)
+  rep("#27AE60", 3), # Lei_Out : Vert (Sciences dans ton graph)
+  rep("#1D8348", 3)  # Lei_Wkd : Vert foncé
+)
+
+# --- 4. VISUALISATION FINALE ---
+p <- fviz_mca_var(res.mca, 
+                  choice = "var.cat", 
+                  invisible = "ind", 
+                  repel = TRUE,
+                  geom = c("point", "text"),
+                  pointsize = 3.5,
+                  labelsize = 4.5,
+                  col.var = couleurs_vars, 
+                  col.quali.sup = "black") # Quartiles en noir pour le contraste
+
+# Ajout de l'ESCS et de la couche cosmétique (Charte Graphique)
+fviz_add(p, res.mca$quanti.sup$coord, 
+         color = "#2E86C1", 
+         geom = "arrow", 
+         repel = TRUE) +
+  # --- MISE EN FORME CHARTE GRAPHIQUE ---
+  labs(
+    title = "Typologie des usages numériques et trajectoires de performance",
+    subtitle = "Analyse des correspondances multiples (ACM) sur les centres de gravité des profils (n=20 000)",
+    caption = "Source : Données PISA 2022 | Analyse multidimensionnelle des profils d'élèves",
+    x = paste0("Dimension 1 (", round(res.mca$eig[1,2], 1), "%) - Intensité d'usage"),
+    y = paste0("Dimension 2 (", round(res.mca$eig[2,2], 1), "%) - Qualité du dosage")
+  ) +
+  theme_minimal(base_family = "sans") +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, margin = margin(b = 10)),
+    plot.subtitle = element_text(size = 12, color = "grey30", margin = margin(b = 20)),
+    plot.caption = element_text(size = 10, hjust = 1, color = "grey40", margin = margin(t = 20)),
+    axis.title = element_text(face = "bold", size = 11),
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
+  )
+```
+
+L'examen des critères de partitionnement révèle une structure complexe. Si le coefficient de silhouette suggère une segmentation fine en 8 groupes, l'analyse de la variance intra-classe (WSS) montre un point d'inflexion pertinent dès $k=3$ . Afin de préserver la **parsimonie** du modèle et de garantir une **interprétabilité sociologique** forte, nous avons retenu une partition en **3 groupes**. Ce choix permet une symétrie parfaite avec notre typologie d'intensité (Faible/Modéré/Intensif) tout en capturant l'essentiel de l'hétérogénéité des comportements numériques.
+
+```{r}
+#| label: diagnostic-kmeans
+library(factoextra)
+
+# On travaille sur les coordonnées de l'ACM (les 5 premières dimensions)
+ind_coords <- as.data.frame(res.mca$ind$coord[, 1:5])
+
+# 1. Graphique du Coude (WSS) 
+# On cherche le point où la courbe arrête de chuter brutalement
+fviz_nbclust(ind_coords, kmeans, method = "wss") +
+  labs(title = "Méthode du Coude", subtitle = "Le point d'inflexion indique le k optimal")
+
+# 2. Graphique de la Silhouette
+# On cherche le pic (la valeur la plus haute)
+fviz_nbclust(ind_coords, kmeans, method = "silhouette") +
+  labs(title = "Méthode de la Silhouette", subtitle = "Le score le plus haut indique le k optimal")
+```
+
+Si l’Analyse des Correspondances Multiples (ACM) nous a permis de cartographier l’espace des possibles numériques, elle ne suffit pas à isoler des groupes d’individus concrets. Pour passer de la « géographie des variables » à une véritable « sociologie des élèves », nous avons mobilisé un algorithme de partitionnement non supervisé : les **K-means**. En appliquant cet algorithme sur les coordonnées factorielles des individus, nous avons segmenté la population en trois clusters homogènes. Cette approche permet de stabiliser des « portraits-robots » d’élèves partageant des structures d'usage similaires. L'objectif est ici de vérifier si ces comportements, identifiés de manière purement statistique, recoupent les trajectoires de performance académique que nous avons projetées en variables illustratives (quartiles de score PISA). 
+
+```{r}
+#| label: clustering-pisa-final-bombproof
+
+# 1. Nettoyage et calcul du score
+set.seed(42)
+data_base <- responses %>%
+  ungroup() %>% 
+  slice_sample(n = 20000) %>%
+  mutate(Score_PISA = (pv_math + pv_reading_comprehension + pv_science) / 3) %>%
+  drop_na(digital_resources_usage_for_leisure_at_school_by_day, Score_PISA)
+
+# 2. Création MANUELLE du tableau pour l'ACM (pour éviter l'erreur de type)
+# On transforme chaque variable en texte puis en facteur explicitement
+df_acm_clean <- data.frame(
+  Lrn_Sch = as.factor(case_when(data_base$digital_resources_usage_for_learning_at_school_by_day <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_learning_at_school_by_day >= 7 ~ "Intensif",
+                                TRUE ~ "Modere")),
+  Lrn_Out = as.factor(case_when(data_base$digital_resources_usage_for_learning_outside_school_by_day <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_learning_outside_school_by_day >= 7 ~ "Intensif",
+                                TRUE ~ "Modere")),
+  Lei_Sch = as.factor(case_when(data_base$digital_resources_usage_for_leisure_at_school_by_day <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_leisure_at_school_by_day >= 7 ~ "Intensif",
+                                TRUE ~ "Modere")),
+  Lei_Out = as.factor(case_when(data_base$digital_resources_usage_for_leisure_outside_school_by_day <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_leisure_outside_school_by_day >= 7 ~ "Intensif",
+                                TRUE ~ "Modere")),
+  Lei_Wkd = as.factor(case_when(data_base$digital_resources_usage_for_leisure_on_weekends <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_leisure_on_weekends >= 7 ~ "Intensif",
+                                TRUE ~ "Modere"))
+)
+
+# 3. Lancement de l'ACM sur ce tableau pur
+library(FactoMineR)
+res.mca <- MCA(df_acm_clean, graph = FALSE)
+
+# 4. K-MEANS sur les coordonnées de l'ACM (5 groupes)
+library(factoextra)
+set.seed(42)
+km_res <- kmeans(res.mca$ind$coord[, 1:3], centers = 3, nstart = 25)
+
+# 5. AJOUT DES RÉSULTATS POUR LE PROFILAGE
+data_base$Cluster <- as.factor(km_res$cluster)
+
+# TABLEAU DE PROFILAGE (C'est lui qu'il me faut !)
+table_profils <- data_base %>%
+  group_by(Cluster) %>%
+  summarise(
+    Effectif = n(),
+    Score_Moyen = round(mean(Score_PISA), 1),
+    ESCS_Moyen = round(mean(index_socioeconomic_status, na.rm=T), 2),
+    Moy_Lei_Sch = round(mean(digital_resources_usage_for_leisure_at_school_by_day), 2),
+    Moy_Lrn_Sch = round(mean(digital_resources_usage_for_learning_at_school_by_day), 2),
+    Moy_Lei_Out = round(mean(digital_resources_usage_for_leisure_outside_school_by_day), 2),
+    Moy_Lrn_Out = round(mean(digital_resources_usage_for_learning_outside_school_by_day), 2)
+  ) %>%
+  arrange(desc(Score_Moyen))
+
+print(table_profils)
+
+# Visualisation finale
+fviz_mca_ind(res.mca, label = "none", habillage = data_base$Cluster, 
+             palette = "jco", addEllipses = TRUE, title = "Classification ACM (3 groupes)")
+```
+
+L'examen de la composition de ces clusters met en évidence une **différenciation des niveaux de réussite scolaire** selon le profil d'usage adopté. On observe une distribution inégale des quartiles de performance entre les groupes : tandis que le **Groupe 1** présente la plus forte concentration d'élèves du quartile supérieur (Q4), la structure des scores tend à se modifier lorsque l'intensité des usages récréatifs augmente. Le **Groupe 3**, caractérisé par une fréquence d'usage numérique plus soutenue au sein de l'établissement, affiche une proportion plus importante d'élèves situés dans le premier quartile de score (Q1). Entre ces deux pôles, le profil du **Groupe 2** apporte une nuance nécessaire : un usage numérique restreint ne garantit pas une performance accrue, ce groupe abritant également une part notable d'élèves en difficulté. En conclusion, cette segmentation suggère que la réussite scolaire est moins liée à une durée globale de connexion qu'à la capacité des élèves à se maintenir dans une zone de dosage modéré, caractéristique du premier groupe.
+
+```{r}
+#| label: clustering-pisa-perf-projection
+
+library(FactoMineR)
+library(factoextra)
+library(dplyr)
+library(ggplot2)
+
+# 1. Nettoyage et calcul du score + QUARTILES
+set.seed(42)
+data_base <- responses %>%
+  ungroup() %>% 
+  slice_sample(n = 20000) %>%
+  mutate(Score_PISA = (pv_math + pv_reading_comprehension + pv_science) / 3) %>%
+  drop_na(digital_resources_usage_for_leisure_at_school_by_day, Score_PISA) %>%
+  # On crée les quartiles de performance (Q1 = Faible, Q4 = Excellent)
+  mutate(Perf_Quartile = factor(ntile(Score_PISA, 4), 
+                                labels = c("Q1_Faible", "Q2_Moyen", "Q3_Bon", "Q4_Excellent")))
+
+# 2. Création MANUELLE du tableau pour l'ACM
+df_acm_clean <- data.frame(
+  Lrn_Sch = as.factor(case_when(data_base$digital_resources_usage_for_learning_at_school_by_day <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_learning_at_school_by_day >= 7 ~ "Intensif",
+                                TRUE ~ "Modere")),
+  Lrn_Out = as.factor(case_when(data_base$digital_resources_usage_for_learning_outside_school_by_day <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_learning_outside_school_by_day >= 7 ~ "Intensif",
+                                TRUE ~ "Modere")),
+  Lei_Sch = as.factor(case_when(data_base$digital_resources_usage_for_leisure_at_school_by_day <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_leisure_at_school_by_day >= 7 ~ "Intensif",
+                                TRUE ~ "Modere")),
+  Lei_Out = as.factor(case_when(data_base$digital_resources_usage_for_leisure_outside_school_by_day <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_leisure_outside_school_by_day >= 7 ~ "Intensif",
+                                TRUE ~ "Modere")),
+  Lei_Wkd = as.factor(case_when(data_base$digital_resources_usage_for_leisure_on_weekends <= 2 ~ "Faible",
+                                data_base$digital_resources_usage_for_leisure_on_weekends >= 7 ~ "Intensif",
+                                TRUE ~ "Modere"))
+)
+
+# 3. Lancement de l'ACM
+res.mca <- MCA(df_acm_clean, graph = FALSE)
+
+# 4. K-MEANS sur les coordonnées de l'ACM (3 groupes)
+set.seed(42)
+km_res <- kmeans(res.mca$ind$coord[, 1:3], centers = 3, nstart = 25)
+data_base$Cluster <- as.factor(km_res$cluster)
+
+# --- NOUVEAUTÉ : VISUALISATION DE LA PERFORMANCE ---
+
+# A. Boxplot : Distribution réelle des scores par cluster
+# Permet de voir la moyenne ET la dispersion (si le cluster est "homogène" ou pas)
+p1 <- ggplot(data_base, aes(x = Cluster, y = Score_PISA, fill = Cluster)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.05, size = 0.5) + # On devine la densité
+  scale_fill_brewer(palette = "Set1") +
+  labs(title = "Distribution des scores PISA par Cluster",
+       subtitle = "Visualisation de l'hétérogénéité de la performance au sein des profils d'usage",
+       y = "Score Moyen PISA") +
+  theme_minimal()
+
+# B. Barres empilées : Composition en quartiles
+# C'est ici que tu verras si le Grp 5 a "trop" de Q1
+df_comp <- data_base %>%
+  group_by(Cluster, Perf_Quartile) %>%
+  summarise(n = n()) %>%
+  mutate(pct = n / sum(n) * 100)
+
+p2 <- ggplot(df_comp, aes(x = Cluster, y = pct, fill = Perf_Quartile)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_d(option = "plasma", direction = -1) +
+  labs(title = "Composition des clusters par niveau de performance",
+       subtitle = "Part des quartiles de score (Q1 à Q4) au sein de chaque groupe",
+       y = "Pourcentage (%)", fill = "Niveau") +
+  theme_minimal()
+
+# Affichage des graphs
+print(p1)
+print(p2)
+
+# Tableau de profilage mis à jour avec la part de "Top Performers"
+table_profils_perf <- data_base %>%
+  group_by(Cluster) %>%
+  summarise(
+    Effectif = n(),
+    Score_Moyen = round(mean(Score_PISA), 1),
+    Part_Excellent_Q4 = round(mean(Perf_Quartile == "Q4_Excellent") * 100, 1),
+    Part_Faible_Q1 = round(mean(Perf_Quartile == "Q1_Faible") * 100, 1),
+    Moy_Lei_Sch = round(mean(digital_resources_usage_for_leisure_at_school_by_day), 2)
+  ) %>%
+  arrange(desc(Score_Moyen))
+
+print(table_profils_perf)
+```
+
+```{r}
+nrow(responses)
+```
+
+# Conclusion
+
+Cette étude vise ainsi à dépasser l'opposition binaire entre « technophiles » et « technophobes » dans le milieu éducatif, afin d'identifier les conditions réelles d'un dosage numérique optimal. Nos analyses mettent en évidence que l'impact des technologies sur les performances scolaires n'est ni linéaire, ni universel, mais se caractérise par une profonde ambivalence.
+
+D'une part, nous confirmons l'existence d'un point de bascule statistique pour les ressources pédagogiques classiques. Une utilisation modérée s'avère corrélée aux meilleurs scores académiques (autour du niveau 4 de l'échelle d'utilisation), tandis que l'hyper-connexion entraîne un décrochage significatif sous les 430 points. D'autre part, la nature de l'usage dicte des trajectoires radicalement différentes. La « gamification » de l'apprentissage (jeux éducatifs) se révèle être une pratique strictement pénalisante, indépendamment du niveau de l'élève. À l'inverse, l'usage récréatif toléré à domicile semble participer à un équilibre favorable , tant qu'il ne franchit pas les portes de la salle de classe, où son irruption provoque la détérioration académique la plus sévère de notre étude .
+
+Enfin, la vulnérabilité face à ce point de bascule est fortement modulée par des facteurs modérateurs sociologiques et académiques. Les élèves des classes supérieures (Grades 11 et 12) ainsi que les garçons montrent une sensibilité et un risque de chute académique nettement plus élevés en cas de surconsommation numérique .
+
+En définitive, la fracture numérique d'aujourd'hui ne se situe plus dans le manque de matériel, mais dans la maîtrise comportementale de l'outil. Le capital socio-culturel et l'encadrement éducatif demeurent les véritables clés permettant de transformer un environnement technologique riche en un levier d'apprentissage plutôt qu'en un piège cognitif. Pour les politiques publiques, l'urgence n'est donc plus d'équiper les établissements, mais de concevoir une éducation à l'attention numérique.
+
+# Références
+
+::: {#refs}
+:::
+
+# Annexes
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+## ACM des variables d'intérêt
+
+```{r}
+#| label: fig-acm-quali
+#| fig-cap: "Plan factoriel de l'Analyse des Correspondances Multiples (ACM)"
+
+library(FactoMineR)
+library(factoextra)
+library(tidyverse)
+
+donnees_acm <- responses |>
+  select(gender, computer_for_work_available, 
+         educational_apps_available, internet_access_available) |>
+  drop_na() |>
+  mutate(
+    Genre = ifelse(gender == 1, "Fille", "Garçon"),
+    Ordi = ifelse(computer_for_work_available == 1, "Ordi_Oui", "Ordi_Non"),
+    Apps = ifelse(educational_apps_available == 1, "Apps_Oui", "Apps_Non"),
+    Internet = ifelse(internet_access_available == 1, "Net_Oui", "Net_Non")
+  ) |>
+  # On place 'Genre' en première position pour s'en servir comme variable supplémentaire
+  select(Genre, Ordi, Apps, Internet) |>
+  mutate(across(everything(), as.factor))
+
+# quali.sup = 1 indique que la 1ère colonne (Genre) ne construit pas les axes, elle est projetée a posteriori.
+res.mca <- MCA(donnees_acm, quali.sup = 1, graph = FALSE)
+
+fviz_mca_var(res.mca, 
+             repel = TRUE, 
+             col.var = "cos2", 
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             title = "Profils de genre projetés sur l'équipement numérique") +
+  theme_minimal()
+```
+
+**Axe 1** : La première dimension oppose diamétralement les élèves équipés (regroupement des modalités Ordi_Oui, Net_Oui, Apps_Oui sur la gauche) aux élèves non équipés (regroupement de Net_Non, Ordi_Non, Apps_Non sur la droite). La position très excentrée du bloc "Non" souligne que l'absence d'équipement est un profil minoritaire mais aux caractéristiques très marquées par rapport à la norme (le côté "Oui", plus proche de l'origine).
+
+**Axe 2** : La seconde dimension est exclusivement construite par la variable du sexe, opposant très nettement la modalité Fille à la modalité Garçon. Le rouge vif indique une représentation parfaite.
+
+L'élément remarquable de cette analyse est dans la position des modalités Fille et Garçon par rapport à l'axe horizontal. Ces deux points se situent presque exactement sur le zéro de la Dim. 1. Sur le plan statistique, il y a donc indépendance totale entre le sexe et le niveau d'équipement matériel. Autrement dit, les garçons et les filles ont une probabilité équivalente d'être équipés ou non en outils numériques à la maison.
+
+## Distribution des scores des élèves
+
+```{r}
+#| label: fig-distrib-scores
+#| fig-cap: "Distribution des scores des élèves en Mathématiques, Sciences et Compréhension écrite"
+
+graph1_var <- interest_var %>%
+  select(pv_math, pv_reading_comprehension,pv_science) %>%
+  pivot_longer(
+    cols = everything(), 
+    names_to = "Matieres", 
+    values_to = "Note"
+  )
+
+ggplot(graph1_var, aes(x = Note, fill = Matieres, color = Matieres)) + 
+  geom_density(alpha = 0.3, linewidth = 1) +
+  
+  scale_fill_manual(
+    name = "Discipline",
+    values = c(
+      "pv_math" = "#D55E00",                
+      "pv_reading_comprehension" = "#0072B2", 
+      "pv_science" = "#009E73"             
+    ),
+    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
+  ) +
+  
+  scale_color_manual(
+    name = "Discipline",
+    values = c(
+      "pv_math" = "#D55E00", 
+      "pv_reading_comprehension" = "#0072B2", 
+      "pv_science" = "#009E73"
+    ),
+    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
+  ) +
+  
+  scale_y_continuous(
+    labels = scales::percent_format(accuracy = 0.1), 
+    name = "Densité de probabilité"
+  ) +
+  
+  labs(
+    title = "Distribution des scores PISA par discipline",
+    x = "Score PISA",
+    caption = "Source : Enquête PISA"
+  ) +
+  
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top",
+    panel.grid.minor = element_blank(), 
+    axis.text.y = element_text(color = "gray40")
+  )
+```
+
+Les scores des trois disciplines suivent une répartition gaussienne classique : le fait le plus marquant est la superposition presque parfaite des trois courbes. Cela indique que le niveau de difficulté global et la notation des tests PISA sont très bien étalonnés d'une matière à l'autre.
+
+Bien que les trois courbes se superposent au niveau global, le graphique ne nous dit absolument pas si un élève excellent en mathématiques est le même que celui qui excelle en sciences. Il affiche des moyennes de groupes, pas des profils individuels : c'est la raison pour laquelle nous introduisons dans la partie 1 l'Alpha de Conbach.
+
 ```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 # Graphique : Usage Loisir par Sexe
 df_loisir_sexe <- responses %>%
@@ -1160,122 +1564,3 @@ ggplot(synthese_disciplines, aes(x = Frequence, y = Note_Moyenne, color = Discip
     panel.grid.minor = element_blank()
   )
 ```
-
-# Conclusion
-
-Cette étude vise ainsi à dépasser l'opposition binaire entre « technophiles » et « technophobes » dans le milieu éducatif, afin d'identifier les conditions réelles d'un dosage numérique optimal. Nos analyses mettent en évidence que l'impact des technologies sur les performances scolaires n'est ni linéaire, ni universel, mais se caractérise par une profonde ambivalence.
-
-D'une part, nous confirmons l'existence d'un point de bascule statistique pour les ressources pédagogiques classiques. Une utilisation modérée s'avère corrélée aux meilleurs scores académiques (autour du niveau 4 de l'échelle d'utilisation), tandis que l'hyper-connexion entraîne un décrochage significatif sous les 430 points. D'autre part, la nature de l'usage dicte des trajectoires radicalement différentes. La « gamification » de l'apprentissage (jeux éducatifs) se révèle être une pratique strictement pénalisante, indépendamment du niveau de l'élève. À l'inverse, l'usage récréatif toléré à domicile semble participer à un équilibre favorable , tant qu'il ne franchit pas les portes de la salle de classe, où son irruption provoque la détérioration académique la plus sévère de notre étude .
-
-Enfin, la vulnérabilité face à ce point de bascule est fortement modulée par des facteurs modérateurs sociologiques et académiques. Les élèves des classes supérieures (Grades 11 et 12) ainsi que les garçons montrent une sensibilité et un risque de chute académique nettement plus élevés en cas de surconsommation numérique .
-
-En définitive, la fracture numérique d'aujourd'hui ne se situe plus dans le manque de matériel, mais dans la maîtrise comportementale de l'outil. Le capital socio-culturel et l'encadrement éducatif demeurent les véritables clés permettant de transformer un environnement technologique riche en un levier d'apprentissage plutôt qu'en un piège cognitif. Pour les politiques publiques, l'urgence n'est donc plus d'équiper les établissements, mais de concevoir une éducation à l'attention numérique.
-
-# Références
-
-::: {#refs}
-:::
-
-# Annexes
-
-## ACM des variables d'intérêt
-
-```{r}
-#| label: fig-acm-quali
-#| fig-cap: "Plan factoriel de l'Analyse des Correspondances Multiples (ACM)"
-
-library(FactoMineR)
-library(factoextra)
-library(tidyverse)
-
-donnees_acm <- responses |>
-  select(gender, computer_for_work_available, 
-         educational_apps_available, internet_access_available) |>
-  drop_na() |>
-  mutate(
-    Genre = ifelse(gender == 1, "Fille", "Garçon"),
-    Ordi = ifelse(computer_for_work_available == 1, "Ordi_Oui", "Ordi_Non"),
-    Apps = ifelse(educational_apps_available == 1, "Apps_Oui", "Apps_Non"),
-    Internet = ifelse(internet_access_available == 1, "Net_Oui", "Net_Non")
-  ) |>
-  # On place 'Genre' en première position pour s'en servir comme variable supplémentaire
-  select(Genre, Ordi, Apps, Internet) |>
-  mutate(across(everything(), as.factor))
-
-# quali.sup = 1 indique que la 1ère colonne (Genre) ne construit pas les axes, elle est projetée a posteriori.
-res.mca <- MCA(donnees_acm, quali.sup = 1, graph = FALSE)
-
-fviz_mca_var(res.mca, 
-             repel = TRUE, 
-             col.var = "cos2", 
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             title = "Profils de genre projetés sur l'équipement numérique") +
-  theme_minimal()
-```
-
-**Axe 1** : La première dimension oppose diamétralement les élèves équipés (regroupement des modalités Ordi_Oui, Net_Oui, Apps_Oui sur la gauche) aux élèves non équipés (regroupement de Net_Non, Ordi_Non, Apps_Non sur la droite). La position très excentrée du bloc "Non" souligne que l'absence d'équipement est un profil minoritaire mais aux caractéristiques très marquées par rapport à la norme (le côté "Oui", plus proche de l'origine).
-
-**Axe 2** : La seconde dimension est exclusivement construite par la variable du sexe, opposant très nettement la modalité Fille à la modalité Garçon. Le rouge vif indique une représentation parfaite.
-
-L'élément remarquable de cette analyse est dans la position des modalités Fille et Garçon par rapport à l'axe horizontal. Ces deux points se situent presque exactement sur le zéro de la Dim. 1. Sur le plan statistique, il y a donc indépendance totale entre le sexe et le niveau d'équipement matériel. Autrement dit, les garçons et les filles ont une probabilité équivalente d'être équipés ou non en outils numériques à la maison.
-
-## Distribution des scores des élèves
-
-```{r}
-#| label: fig-distrib-scores
-#| fig-cap: "Distribution des scores des élèves en Mathématiques, Sciences et Compréhension écrite"
-
-graph1_var <- interest_var %>%
-  select(pv_math, pv_reading_comprehension,pv_science) %>%
-  pivot_longer(
-    cols = everything(), 
-    names_to = "Matieres", 
-    values_to = "Note"
-  )
-
-ggplot(graph1_var, aes(x = Note, fill = Matieres, color = Matieres)) + 
-  geom_density(alpha = 0.3, linewidth = 1) +
-  
-  scale_fill_manual(
-    name = "Discipline",
-    values = c(
-      "pv_math" = "#D55E00",                
-      "pv_reading_comprehension" = "#0072B2", 
-      "pv_science" = "#009E73"             
-    ),
-    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
-  ) +
-  
-  scale_color_manual(
-    name = "Discipline",
-    values = c(
-      "pv_math" = "#D55E00", 
-      "pv_reading_comprehension" = "#0072B2", 
-      "pv_science" = "#009E73"
-    ),
-    labels = c("Mathématiques", "Compréhension de l'écrit", "Sciences")
-  ) +
-  
-  scale_y_continuous(
-    labels = scales::percent_format(accuracy = 0.1), 
-    name = "Densité de probabilité"
-  ) +
-  
-  labs(
-    title = "Distribution des scores PISA par discipline",
-    x = "Score PISA",
-    caption = "Source : Enquête PISA"
-  ) +
-  
-  theme_minimal() +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    legend.position = "top",
-    panel.grid.minor = element_blank(), 
-    axis.text.y = element_text(color = "gray40")
-  )
-```
-
-Les scores des trois disciplines suivent une répartition gaussienne classique : le fait le plus marquant est la superposition presque parfaite des trois courbes. Cela indique que le niveau de difficulté global et la notation des tests PISA sont très bien étalonnés d'une matière à l'autre.
-
-Bien que les trois courbes se superposent au niveau global, le graphique ne nous dit absolument pas si un élève excellent en mathématiques est le même que celui qui excelle en sciences. Il affiche des moyennes de groupes, pas des profils individuels : c'est la raison pour laquelle nous introduisons dans la partie 1 l'Alpha de Conbach.
