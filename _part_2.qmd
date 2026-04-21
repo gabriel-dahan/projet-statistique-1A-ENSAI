@@ -131,12 +131,27 @@ df_barres <- responses %>%
   filter(!is.na(Modalite), !is.na(gender)) %>%
   mutate(Sexe = ifelse(gender == 1, "Filles", "Garçons"))
 
-ggplot(df_barres, aes(x = factor(Modalite), fill = Sexe)) +
-  geom_bar(position = "fill", width = 0.7, alpha = 0.9) + 
+df_plot <- df_barres %>%
+  count(Modalite, Sexe) %>%          
+  group_by(Modalite) %>%             
+  mutate(Proportion = n / sum(n)) %>% 
+  ungroup()
+
+ggplot(df_plot, aes(x = factor(Modalite), y = Proportion, fill = Sexe)) +
+  geom_col(width = 0.7, alpha = 0.9) + 
+  
+  geom_text(
+    aes(label = scales::percent(Proportion, accuracy = 1)), 
+    position = position_stack(vjust = 0.5),                 
+    color = "white",                                        
+    fontface = "bold",
+    size = 4
+  ) +
   
   scale_fill_manual(values = c("Filles" = "#fc2d3b", "Garçons" = "#0072B2")) +
   
-  scale_y_continuous(labels = percent_format()) + 
+  # On s'assure d'utiliser le package scales pour l'axe Y
+  scale_y_continuous(labels = scales::percent_format()) + 
   
   labs(
     title = "Proportion de Filles et de Garçons\nselon l'intensité d'usage numérique",
@@ -144,7 +159,7 @@ ggplot(df_barres, aes(x = factor(Modalite), fill = Sexe)) +
     x = "Fréquence globale moyenne (1 = Très faible, 9 = Très intensive)",
     y = "Pourcentage d'élèves",
     fill = "Genre",
-    caption = "Figure 3 | Source : Données PISA 2022 \nNote de lecture : Aux fréquences extrêmes (1 ou 9), les garçons sont surreprésentés."
+    caption = "Source : Données PISA 2022 \nNote de lecture : Aux fréquences extrêmes (1 ou 9), les garçons sont surreprésentés."
   ) +
   theme_minimal(base_size = 13) +
   theme(
