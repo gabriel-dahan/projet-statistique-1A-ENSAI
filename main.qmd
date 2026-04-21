@@ -859,10 +859,6 @@ ggplot(synthese_graphique_mixte, aes(x = Frequence, y = Note_Moyenne, color = Ty
   )
 ```
 
-
-
-
-
 Au terme de cette analyse, il apparaît que les approches bivariées, bien qu'essentielles pour identifier la relation en « U inversé » entre le numérique et les scores PISA , ne suffisent pas à saisir l'entière complexité des trajectoires individuelles des élèves. La réussite éducative ne dépend pas d'un facteur isolé, mais d'un système d'interactions complexes entre l'intensité d'usage, la nature de l'activité pédagogique ou récréative et le contexte spatial de consommation, qu'il soit scolaire ou domestique . L’Analyse des Correspondances Multiples (ACM) s’impose alors comme l’outil de synthèse idéal pour cartographier ces interactions au sein d’un espace factoriel unique, permettant de dépasser l'opposition binaire entre technophiles et technophobes pour identifier les conditions réelles d'un dosage numérique optimal . Afin de garantir une lisibilité statistique rigoureuse, nous avons fait le choix de discrétiser les échelles de fréquence initiales en trois modalités (Faible, Modéré et Intensif) et de projeter, en variables illustratives, le statut socio-économique (ESCS) ainsi que la performance scolaire découpée en quartiles (Q1 à Q4) . Cette démarche vise à vérifier si l'excellence académique, représentée par notre indicateur multidimensionnel dont la cohérence interne a été validée ($\alpha > 0,93$), gravite effectivement autour d'un pôle de régulation des usages plutôt que vers l'abstinence ou l'hyper-connexion . Le plan factoriel qui suit oppose ainsi une Dimension 1 caractérisant l'intensité globale d'équipement et d'usage à une Dimension 2 révélant la qualité du dosage numérique, mettant notamment en exergue la toxicité particulière des loisirs intensifs au sein de l'établissement . En définitive, cette carte statistique constitue la preuve visuelle que la fracture numérique contemporaine ne réside plus dans le manque de matériel, mais bien dans la maîtrise comportementale de l'outil comme levier d'apprentissage .
 
 ```{r}
@@ -1047,18 +1043,15 @@ library(factoextra)
 library(dplyr)
 library(ggplot2)
 
-# 1. Nettoyage et calcul du score + QUARTILES
 set.seed(42)
 data_base <- responses %>%
   ungroup() %>% 
   slice_sample(n = 20000) %>%
   mutate(Score_PISA = (pv_math + pv_reading_comprehension + pv_science) / 3) %>%
   drop_na(digital_resources_usage_for_leisure_at_school_by_day, Score_PISA) %>%
-  # On crée les quartiles de performance (Q1 = Faible, Q4 = Excellent)
   mutate(Perf_Quartile = factor(ntile(Score_PISA, 4), 
                                 labels = c("Q1_Faible", "Q2_Moyen", "Q3_Bon", "Q4_Excellent")))
 
-# 2. Création MANUELLE du tableau pour l'ACM
 df_acm_clean <- data.frame(
   Lrn_Sch = as.factor(case_when(data_base$digital_resources_usage_for_learning_at_school_by_day <= 2 ~ "Faible",
                                 data_base$digital_resources_usage_for_learning_at_school_by_day >= 7 ~ "Intensif",
@@ -1077,35 +1070,19 @@ df_acm_clean <- data.frame(
                                 TRUE ~ "Modere"))
 )
 
-# 3. Lancement de l'ACM
 res.mca <- MCA(df_acm_clean, graph = FALSE)
 
-# 4. K-MEANS sur les coordonnées de l'ACM (3 groupes)
 set.seed(42)
 km_res <- kmeans(res.mca$ind$coord[, 1:3], centers = 3, nstart = 25)
 data_base$Cluster <- as.factor(km_res$cluster)
 
-# --- NOUVEAUTÉ : VISUALISATION DE LA PERFORMANCE ---
 
-# A. Boxplot : Distribution réelle des scores par cluster
-# Permet de voir la moyenne ET la dispersion (si le cluster est "homogène" ou pas)
-p1 <- ggplot(data_base, aes(x = Cluster, y = Score_PISA, fill = Cluster)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
-  geom_jitter(width = 0.2, alpha = 0.05, size = 0.5) + # On devine la densité
-  scale_fill_brewer(palette = "Set1") +
-  labs(title = "Distribution des scores PISA par Cluster",
-       subtitle = "Visualisation de l'hétérogénéité de la performance au sein des profils d'usage",
-       y = "Score Moyen PISA") +
-  theme_minimal()
-
-# B. Barres empilées : Composition en quartiles
-# C'est ici que tu verras si le Grp 5 a "trop" de Q1
 df_comp <- data_base %>%
   group_by(Cluster, Perf_Quartile) %>%
   summarise(n = n()) %>%
   mutate(pct = n / sum(n) * 100)
 
-p2 <- ggplot(df_comp, aes(x = Cluster, y = pct, fill = Perf_Quartile)) +
+p <- ggplot(df_comp, aes(x = Cluster, y = pct, fill = Perf_Quartile)) +
   geom_bar(stat = "identity") +
   scale_fill_viridis_d(option = "plasma", direction = -1) +
   labs(title = "Composition des clusters par niveau de performance",
@@ -1113,27 +1090,7 @@ p2 <- ggplot(df_comp, aes(x = Cluster, y = pct, fill = Perf_Quartile)) +
        y = "Pourcentage (%)", fill = "Niveau") +
   theme_minimal()
 
-# Affichage des graphs
-print(p1)
-print(p2)
-
-# Tableau de profilage mis à jour avec la part de "Top Performers"
-table_profils_perf <- data_base %>%
-  group_by(Cluster) %>%
-  summarise(
-    Effectif = n(),
-    Score_Moyen = round(mean(Score_PISA), 1),
-    Part_Excellent_Q4 = round(mean(Perf_Quartile == "Q4_Excellent") * 100, 1),
-    Part_Faible_Q1 = round(mean(Perf_Quartile == "Q1_Faible") * 100, 1),
-    Moy_Lei_Sch = round(mean(digital_resources_usage_for_leisure_at_school_by_day), 2)
-  ) %>%
-  arrange(desc(Score_Moyen))
-
-print(table_profils_perf)
-```
-
-```{r}
-nrow(responses)
+print(p)
 ```
 
 # Conclusion
