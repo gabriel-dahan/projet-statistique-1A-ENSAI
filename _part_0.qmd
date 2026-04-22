@@ -1,3 +1,21 @@
+```{r}
+
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(flextable)
+library(officer)
+library(scales)         # Pour la fonction percent_format() de votre dernier graphique
+library(sf)             # Pour manipuler les objets géographiques (cartes)
+library(rnaturalearth)  # Pour obtenir les données des pays (ne_countries)
+library(rnaturalearthdata) # Complément nécessaire pour les données cartographiques
+
+# Chargement des données
+responses <- readRDS("clean_stu_qqq.rds")
+```
+
+
 ## 0.1. Enquête PISA : présentation des données
 
 L'évaluation PISA est une vaste enquête menée sous l'égide de l'OCDE tous les trois ans depuis l'an 2000. Elle a pour objectif principal d'évaluer les compétences des élèves de 15 ans (qui arrivent généralement en fin de scolarité obligatoire) dans trois domaines fondamentaux : la compréhension de l'écrit, la culture mathématique et la culture scientifique.
@@ -6,7 +24,7 @@ Contrairement à des évaluations classiques, PISA ne se concentre pas uniquemen
 
 L'édition de 2022 a impliqué 690 000 élèves issus de 81 pays. À chaque cycle, un domaine est évalué de manière plus poussée. En 2022, la priorité a été donnée à la culture mathématique. En France, environ 6 700 élèves ont été tirés au sort dans 285 établissements pour assurer une représentativité nationale . La majorité de ces élèves (64,2 %) étaient scolarisés en classe de seconde générale et technologique
 
-Le test se déroule sur ordinateur. Il est composé de plusieurs unités ancrées dans des contextes de la vie réelle (personnels, professionnels, sociétaux ou scientifiques) et propose différents formats de réponses, notamment des questions à choix multiple et des questions à réponse construite ouverte.En plus des compétences scolaires, PISA s'intéresse à l'environnement des élèves en récoltant des données sur leur accès aux équipements (comme les technologies numériques) et leur indice de statut économique, social et culturel afin d'analyser les facteurs modérateurs de la réussite.
+Le test se déroule sur ordinateur. Il est composé de plusieurs unités ancrées dans des contextes de la vie réelle (personnels, professionnels, sociétaux ou scientifiques) et propose différents formats de réponses, notamment des questions à choix multiple et des questions à réponse construite ouverte. En plus des compétences scolaires, PISA s'intéresse à l'environnement des élèves en récoltant des données sur leur accès aux équipements (comme les technologies numériques) et leur indice de statut économique, social et culturel afin d'analyser les facteurs modérateurs de la réussite.
 
 Dans le cadre du projet statistique analysant les données PISA, les variables d'intérêt étudiées se divisent en deux grandes catégories principales : celles liées aux technologies et leurs utilisations, et celles mesurant les performances éducatives.
 
@@ -54,7 +72,7 @@ Dans le cadre du projet statistique analysant les données PISA, les variables d
 
 ## 0.2 L'accès matériel : une fracture résorbée ?
 
-Avant de corréler l'usage du numérique aux performances académiques, il convient de dresser un état des lieux de l'accès matériel aux outils technologiques. L'analyse descriptive de la base de données PISA révèle une démocratisation de l'équipement de base. En observant la disponibilité d'une connexion internet, d'un ordinateur pour le travail et d'applications éducatives, on constate qu'une très vaste majorité d'élèves (plus de $85\%$ en moyenne globale) dispose de ces outils à domicile. Ce niveau d'équipement primaire confirme notre postulat initial : les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau. L'enjeu de l'inégalité se déplace vers la manière dont ce matériel est exploité par les élèves.
+Avant de corréler l'usage du numérique aux performances académiques, il convient de dresser un état des lieux de l'accès matériel aux outils technologiques. L'analyse descriptive de la base de données PISA révèle une démocratisation de l'équipement de base. Si l’on observe l’accès aux outils numériques de base à domicile, c’est-à-dire : une connexion internet, un ordinateur pour le travail et d'applications éducatives, on constate qu'une très vaste majorité d'élèves (plus de $85\%$ en moyenne globale) dispose de ces outils à domicile. Ce niveau d'équipement primaire confirme notre postulat initial : les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau. L'enjeu de l'inégalité se déplace de la possession de l’outil vers la capacité de l’élève à l’exploiter.
 
 ```{r}
 #| label: tbl-acces-materiel
@@ -81,19 +99,36 @@ tableau_acces <- responses %>%
 
 flextable(tableau_acces) %>%
   set_header_labels(
-    Equipement = "Type d'équipement", 
-    Pourcentage = "Pourcentage d'élèves"
+    Equipement  = "Type d'équipement",
+    Pourcentage = "Proportion d'élèves (%)"
   ) %>%
-  add_footer_lines("Source : PISA 2022 | Champ : Élèves de 15 ans des 81 pays participants") %>%
-  theme_vanilla() %>%
-  autofit() %>%
+  add_footer_lines("Source : PISA 2022\nChamp : Élèves de 15 ans des 81 pays participants\nNote de lecture : Selon les données PISA 2022, 90,2 % des élèves de 15 ans issus des 81 pays participants déclarent disposer d'un accès à Internet à leur domicile.") %>%
+  # ── Style typographique aligné sur le graphique de référence ──────────────
+  font(fontname = "Arial", part = "all") %>%
+  fontsize(size = 11, part = "body") %>%
+  fontsize(size = 11, part = "header") %>%
+  bold(part = "header") %>%
+  color(part = "header", color = "white") %>%
+  bg(part = "header", bg = "#2C3E50") %>%        # en-tête sombre sobre
+  bg(i = seq(2, nrow(tableau_acces), 2),
+     bg = "#F5F5F5", part = "body") %>%           # zébrage léger
+  color(part = "body",   color = "grey20") %>%
+  color(part = "footer", color = "grey40") %>%
+  fontsize(size = 9, part = "footer") %>%
+  italic(part = "footer") %>%
+  border_remove() %>%
+  hline(part = "body",
+        border = fp_border(color = "grey80", width = 0.5)) %>%
+  hline_bottom(part = "body",
+               border = fp_border(color = "#2C3E50", width = 1.5)) %>%
   align(align = "center", part = "all") %>%
-  align(j = 1, align = "left", part = "all")
+  align(j = 1, align = "left", part = "all") %>%
+  autofit()
 ```
 
 ## 0.3. La cartographie mondiale des usages
 
-Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique de ces outils varie d'un système éducatif à l'autre. La cartographie de l'utilisation moyenne des ressources numériques à l'école met en évidence des clivages géographiques majeurs (@fig-carte-usage). Ces disparités nationales rappellent que l'accès au numérique est avant tout le fruit de politiques éducatives, offrant ainsi un cadre très hétérogène à l'évaluation des performances.
+Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique de ces outils varie d'un système éducatif à l'autre. La cartographie de l'utilisation moyenne des ressources numériques à l'école met en évidence des clivages géographiques  (@fig-carte-usage). Ces disparités nationales rappellent que l'accès au numérique est avant tout le fruit de politiques éducatives, offrant ainsi un cadre très hétérogène à l'évaluation des performances.
 
 ```         
 ```
@@ -101,81 +136,131 @@ Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique 
 ```{r, warning=FALSE, results='hide'}
 #| label: fig-carte-usage
 #| fig-cap: "Intensité moyenne d'utilisation des ressources numériques à l'école par pays"
+#| warning: false
+#| results: hide
 
 usage_ecole_pays <- responses %>%
   group_by(country) %>%
-  summarise(usage_moyen_ecole = mean(digital_resources_usage_for_learning_at_school_by_day, na.rm = TRUE)) %>%
+  summarise(usage_moyen_ecole = mean(digital_resources_usage_for_learning_at_school_by_day,
+                                     na.rm = TRUE)) %>%
   drop_na(usage_moyen_ecole) %>%
-  # LE TRADUCTEUR EST ICI : On renomme les codes PISA pour qu'ils matchent avec la carte
   mutate(country = case_when(
-    country == "KSV" ~ "KOS", # Kosovo
-    country == "PSE" ~ "PSX", # Palestine
-    country == "QAZ" ~ "AZE", # Azerbaïdjan (Baku)
-    country == "QUR" ~ "UKR", # Ukraine
-    country == "TAP" ~ "TWN", # Taïwan
-    TRUE ~ country            # On ne touche pas aux autres
+    country == "KSV" ~ "KOS",
+    country == "PSE" ~ "PSX",
+    country == "QAZ" ~ "AZE",
+    country == "QUR" ~ "UKR",
+    country == "TAP" ~ "TWN",
+    TRUE ~ country
   ))
 
-# 2. Chargement de la carte
-monde <- ne_countries(scale = "medium", returnclass = "sf")
-
-# 3. Jointure des données avec la carte
+monde      <- ne_countries(scale = "medium", returnclass = "sf")
 carte_usage <- monde %>%
   left_join(usage_ecole_pays, by = c("adm0_a3" = "country"))
 
-# 4. Tracé de la carte
 ggplot(data = carte_usage) +
   geom_sf(aes(fill = usage_moyen_ecole), color = "white", linewidth = 0.1) +
   scale_fill_viridis_c(
-    option = "magma",
+    option   = "magma",
     na.value = "lightgray",
-    name = "Fréquence moyenne\n(Échelle 1-9)"
+    name     = "Fréquence moyenne\n(Échelle 1-9)"
   ) +
   labs(
-    title = "Utilisation des ressources numériques à l'école",
+    title    = "Utilisation des ressources numériques à l'école",
     subtitle = "Fréquence moyenne déclarée par les élèves (PISA 2022)",
-    caption = "Source : Données PISA 2022 \nChamp : Élèves de 15 ans des 81 pays participants \nNote de lecture : Plus la couleur est claire, plus l'utilisation est fréquente."
+    caption  = "Source : Données PISA 2022\nChamp : Élèves de 15 ans des 81 pays participants\nNote de lecture : Plus la teinte du pays est claire, plus les élèves de 15 ans déclarent utiliser fréquemment les ressources numériques dans le cadre scolaire."
   ) +
-  theme_minimal() +
+  theme_minimal(base_size = 12) +
   theme(
-    axis.text = element_blank(),
-    axis.ticks = element_blank(),
-    panel.grid = element_blank()
+    axis.text          = element_blank(),
+    axis.ticks         = element_blank(),
+    panel.grid         = element_blank(),
+    plot.title         = element_text(face = "bold", size = 14),
+    plot.subtitle      = element_text(margin = margin(b = 15)),
+    plot.caption       = element_text(hjust = 0, face = "italic",
+                                      color = "grey40", size = 9),
+    plot.background    = element_rect(fill = "white", color = NA),
+    panel.background   = element_rect(fill = "white", color = NA),
+    legend.position    = "right",
+    legend.title       = element_text(face = "bold", size = 10),
+    legend.text        = element_text(color = "grey30", size = 9)
   )
 ```
 
 ## 0.4. Un poids du statut socio-économique sur le suréquipement
 
-Si la fracture d'accès primaire se réduit, l'indice de statut économique, social et culturel (ESCS) demeure un puissant déterminant du niveau d'équipement technologique. L'analyse du volume d'appareils numériques au sein du foyer selon les quartiles socio-économiques montre une corrélation directe. Le passage à une représentation en histogramme cumulé met en lumière que près de la moitié des élèves du quartile le plus favorisé (Q4) possèdent plus de 6 appareils à domicile, contre une très faible proportion dans le quartile le plus modeste. Cette abondance matérielle dans les milieux aisés confirme que l'enjeu ne réside potentiellement plus dans le manque d'outils, mais dans la surexposition (\@fig-escs-equipement).
+Si la fracture d'accès primaire se réduit, l'indice de statut économique, social et culturel (ESCS) demeure un déterminant majeur du niveau d'équipement technologique. L'analyse du volume d'appareils numériques au sein du foyer selon les quartiles socio-économiques montre une corrélation directe. Le passage à une représentation en histogramme cumulé met en lumière que près de la moitié des élèves du quartile le plus favorisé (Q4) possèdent plus de 6 appareils à domicile, contre une très faible proportion dans le quartile le plus modeste. Cette abondance matérielle dans les milieux aisés suggère que l'enjeu ne réside plus uniquement dans l'accès aux outils, mais potentiellement dans leur surexposition. Ce constat invite à intégrer l'hypothèse d'un effet de saturation numérique dans l'analyse des performances éducatives (@fig-escs-equipement).
 
 ```{r}
 #| label: fig-escs-equipement
 #| fig-cap: "Répartition du volume d'équipement numérique au domicile selon le quartile socio-économique (ESCS)"
 
+# ── Thème local ───────────────────────────────────────────────────────────────
+theme_pisa <- theme_minimal(base_size = 12) +
+  theme(
+    legend.position  = "bottom",
+    legend.direction = "vertical",
+    plot.title       = element_text(face = "bold", size = 14),
+    plot.subtitle    = element_text(margin = margin(b = 15)),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey85", linewidth = 0.4),
+    axis.title       = element_text(face = "bold"),
+    axis.text        = element_text(color = "grey30"),
+    plot.caption     = element_text(hjust = 0, face = "italic",
+                                    color = "grey40", size = 9),
+    plot.background  = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA)
+  )
+# ─────────────────────────────────────────────────────────────────────────────
+
 responses_escs <- responses %>%
   drop_na(index_socioeconomic_status, nb_digital_devices_at_home) %>%
   mutate(
     ESCS_quartile = ntile(index_socioeconomic_status, 4),
-    ESCS_quartile = factor(ESCS_quartile, labels = c("Q1 (Modeste)", "Q2", "Q3", "Q4 (Favorisé)")),
+    ESCS_quartile = factor(ESCS_quartile,
+                           labels = c("Q1 (Modeste)", "Q2", "Q3", "Q4 (Favorisé)")),
     Classe_Equipement = case_when(
       nb_digital_devices_at_home <= 3 ~ "1 à 3 appareils",
       nb_digital_devices_at_home <= 6 ~ "4 à 6 appareils",
-      TRUE ~ "Plus de 6 appareils"
+      TRUE                            ~ "Plus de 6 appareils"
     ),
-    Classe_Equipement = factor(Classe_Equipement, levels = c("1 à 3 appareils", "4 à 6 appareils", "Plus de 6 appareils"))
+    Classe_Equipement = factor(Classe_Equipement,
+                               levels = c("1 à 3 appareils",
+                                          "4 à 6 appareils",
+                                          "Plus de 6 appareils"))
+  )
+
+etiquettes <- responses_escs %>%
+  count(ESCS_quartile, Classe_Equipement) %>%
+  group_by(ESCS_quartile) %>%
+  mutate(prop = n / sum(n)) %>%
+  ungroup() %>%
+  filter(
+    Classe_Equipement == "Plus de 6 appareils",
+    ESCS_quartile %in% c("Q1 (Modeste)", "Q4 (Favorisé)")
+  ) %>%
+  mutate(
+    ymid  = prop / 2,
+    label = paste0(round(prop * 100), "%")
   )
 
 ggplot(responses_escs, aes(x = ESCS_quartile, fill = Classe_Equipement)) +
   geom_bar(position = "fill", color = "white", alpha = 0.85) +
+  geom_text(
+    data        = etiquettes,
+    aes(x = ESCS_quartile, y = ymid, label = label),
+    inherit.aes = FALSE,
+    color       = "white",
+    fontface    = "bold",
+    size        = 3.8
+  ) +
   scale_fill_brewer(palette = "Blues") +
   scale_y_continuous(labels = percent_format()) +
   labs(
-    title = "Volume d'équipement numérique selon le milieu social",
-    x = "Indice socio-économique (quartiles ESCS)",
-    y = "Proportion d'élèves",
-    fill = "Nombre d'appareils à domicile",
-    caption = "Source : PISA 2022 \nChamp : Élèves de 15 ans \nLecture : Près de la moitié des élèves du Q4 possèdent plus de 6 appareils."
+    title   = "Volume d'équipement numérique selon le milieu social",
+    x       = "Indice socio-économique (quartiles ESCS)",
+    y       = "Proportion d'élèves",
+    fill    = "Nombre d'appareils à domicile",
+    caption = "Source : PISA 2022\nChamp : Élèves de 15 ans\nLecture : Près de la moitié des élèves du Q4 possèdent plus de 6 appareils."
   ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+  theme_pisa
 ```
