@@ -191,39 +191,45 @@ Si la fracture d'accès primaire se réduit, l'indice de statut économique, soc
 ```{r}
 #| label: fig-escs-equipement
 #| fig-cap: "Répartition du volume d'équipement numérique au domicile selon le quartile socio-économique (ESCS)"
+#| fig-width: 10
+#| fig-height: 7
 
-# ── Thème local ───────────────────────────────────────────────────────────────
-theme_pisa <- theme_minimal(base_size = 12) +
+# ── Thème local optimisé pour la visibilité ──────────────────────────────────
+theme_pisa_grand <- theme_minimal(base_size = 14) + # base_size augmentée
   theme(
     legend.position  = "bottom",
-    legend.direction = "vertical",
-    plot.title       = element_text(face = "bold", size = 14),
-    plot.subtitle    = element_text(margin = margin(b = 15)),
+    legend.direction = "horizontal",
+    legend.title     = element_text(face = "bold", size = 12),
+    legend.text      = element_text(size = 11),
+    plot.title       = element_text(face = "bold", size = 18, margin = margin(b = 10)),
+    plot.subtitle    = element_text(size = 13, margin = margin(b = 15)),
     panel.grid.minor = element_blank(),
-    panel.grid.major = element_line(color = "grey85", linewidth = 0.4),
-    axis.title       = element_text(face = "bold"),
-    axis.text        = element_text(color = "grey30"),
-    plot.caption     = element_text(hjust = 0, face = "italic",
-                                    color = "grey40", size = 9),
+    panel.grid.major = element_line(color = "grey90", linewidth = 0.5),
+    axis.title       = element_text(face = "bold", size = 13),
+    axis.title.y     = element_text(margin = margin(r = 10)),
+    axis.text        = element_text(color = "grey20", size = 11),
+    plot.caption     = element_text(hjust = 0, face = "italic", 
+                                    color = "grey40", size = 10, margin = margin(t = 20)),
     plot.background  = element_rect(fill = "white", color = NA),
-    panel.background = element_rect(fill = "white", color = NA)
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.margin      = margin(20, 20, 20, 20) # Ajout de marges internes pour respirer
   )
-# ─────────────────────────────────────────────────────────────────────────────
 
+# ── Préparation des données (inchangée) ──────────────────────────────────────
 responses_escs <- responses %>%
   drop_na(index_socioeconomic_status, nb_digital_devices_at_home) %>%
   mutate(
     ESCS_quartile = ntile(index_socioeconomic_status, 4),
-    ESCS_quartile = factor(ESCS_quartile,
+    ESCS_quartile = factor(ESCS_quartile, 
                            labels = c("Q1 (Modeste)", "Q2", "Q3", "Q4 (Favorisé)")),
     Classe_Equipement = case_when(
       nb_digital_devices_at_home <= 3 ~ "1 à 3 appareils",
       nb_digital_devices_at_home <= 6 ~ "4 à 6 appareils",
       TRUE                            ~ "Plus de 6 appareils"
     ),
-    Classe_Equipement = factor(Classe_Equipement,
-                               levels = c("1 à 3 appareils",
-                                          "4 à 6 appareils",
+    Classe_Equipement = factor(Classe_Equipement, 
+                               levels = c("1 à 3 appareils", 
+                                          "4 à 6 appareils", 
                                           "Plus de 6 appareils"))
   )
 
@@ -237,28 +243,29 @@ etiquettes <- responses_escs %>%
     ESCS_quartile %in% c("Q1 (Modeste)", "Q4 (Favorisé)")
   ) %>%
   mutate(
-    ymid  = prop / 2,
+    ymid  = (prop / 2), 
     label = paste0(round(prop * 100), "%")
   )
 
+# ── Graphique grand format ───────────────────────────────────────────────────
 ggplot(responses_escs, aes(x = ESCS_quartile, fill = Classe_Equipement)) +
-  geom_bar(position = "fill", color = "white", alpha = 0.85) +
+  geom_bar(position = "fill", color = "white", alpha = 0.9, width = 0.85) + # width augmentée
   geom_text(
     data        = etiquettes,
     aes(x = ESCS_quartile, y = ymid, label = label),
     inherit.aes = FALSE,
     color       = "white",
     fontface    = "bold",
-    size        = 3.8
+    size        = 5.5 # Texte des pourcentages plus grand
   ) +
-  scale_fill_brewer(palette = "Blues") +
-  scale_y_continuous(labels = percent_format()) +
+  scale_fill_brewer(palette = "Blues", guide = guide_legend(reverse = TRUE)) +
+  scale_y_continuous(labels = scales::percent_format(), expand = expansion(mult = c(0, 0.05))) +
   labs(
     title   = "Volume d'équipement numérique selon le milieu social",
     x       = "Indice socio-économique (quartiles ESCS)",
     y       = "Proportion d'élèves",
-    fill    = "Nombre d'appareils à domicile",
-    caption = "Source : PISA 2022\nChamp : Élèves de 15 ans\nNote de lecture : Selon les données PISA 2022, 91 % des élèves appartenant au quartile le plus favorisé (Q4) disposent de plus de 6 appareils numériques à leur domicile."
+    fill    = "Équipement :",
+    caption = "Source : PISA 2022\nNote : 91 % des élèves favorisés (Q4) possèdent plus de 6 appareils."
   ) +
-  theme_pisa
+  theme_pisa_grand
 ```
