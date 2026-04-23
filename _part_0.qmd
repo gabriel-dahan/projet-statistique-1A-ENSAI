@@ -1,3 +1,17 @@
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(flextable)
+library(officer)
+library(scales)         # Pour la fonction percent_format() de votre dernier graphique
+library(sf)             # Pour manipuler les objets géographiques (cartes)
+library(rnaturalearth)  # Pour obtenir les données des pays (ne_countries)
+library(rnaturalearthdata) # Complément nécessaire pour les données cartographiques
+responses <- readRDS("clean_stu_qqq.rds")
+```
 
 
 ## 0.1. Enquête PISA : présentation des données

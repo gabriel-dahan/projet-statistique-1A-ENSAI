@@ -1,3 +1,31 @@
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(flextable)
+library(officer)
+library(scales)         # Pour la fonction percent_format() de votre dernier graphique
+library(sf)             # Pour manipuler les objets géographiques (cartes)
+library(rnaturalearth)  # Pour obtenir les données des pays (ne_countries)
+library(rnaturalearthdata) # Complément nécessaire pour les données cartographiques
+responses <- readRDS("clean_stu_qqq.rds")
+
+couleurs_pisa <- c(
+  "Loisirs" = "#1f77b4", 
+  "Apprentissage" = "#ff7f0e",
+  "École" = "#2ca02c"
+) # Ajustez les noms et couleurs selon votre premier fichier
+
+labels_activites <- c(
+  "Loisirs" = "Activités de loisirs",
+  "Apprentissage" = "Activités pédagogiques",
+  "École" = "Usage en classe")
+
+```
+
+
 L’analyse de l’influence des technologies numériques sur la réussite scolaire impose au préalable de définir une mesure robuste de la performance elle-même. Pour ce faire, notre étude repose sur le développement d'un indicateur multidimensionnel dont la validité est éprouvée par le test de l'Alpha de Cronbach. 
 
 Ce test nous permet de vérifier que les résultats obtenus en mathématiques, en sciences et en lecture sont cohérents entre eux. Il garantit que ces trois matières "vont dans le même sens" et peuvent donc être réunies pour former une seule mesure globale du niveau de l'élève.
@@ -13,6 +41,7 @@ L'Alpha de Cronbach est un indicateur statistique (variant de $0$ à $1$) qui me
 Afin de vérifier la pertinence de la création d'un indicateur unique de performance, nous avons calculé l'Alpha de Cronbach. Le test révèle une cohérence interne très élevée ($\alpha > 0.93$) et une corrélation inter-items forte ($r \approx 0.90$), justifiant ainsi l'agrégation des scores de mathématiques, sciences et compréhension de l'écrit en une variable composite unique.
 
 ```{r}
+#| echo: false
 #| label: tbl-alpha-cronbach
 #| fig-cap: "Alpha de Cronbach et corrélation des scores"
 
@@ -78,9 +107,10 @@ print(resultat_alpha$alpha.drop)
 
 ### Différence entre deux types de technologie.
 
-L'étude de la cohérence interne des usages numériques liés à l'apprentissage révèle une hétérogénéité des pratiques. Si l'Alpha de Cronbach global de l'échelle est modeste ($0,57$), l'analyse détaillée est éclairante. L'Alpha « en cas de suppression » permet d'identifier si une variable perturbe la cohérence globale : si l'indice augmente de façon importante lorsqu'on retire une variable, cela signifie qu'elle ne mesure pas la même dimension que les autres. Ici, l'item relatif aux jeux numériques éducatifs agit comme un facteur de dissonance. Son retrait permettrait à lui seul de porter la fiabilité de l'échelle des ressources classiques à $0,68$. Cette divergence statistique nous conduit à traiter séparément deux dimensions de l'usage numérique : d'une part, les ressources pédagogiques structurées (manuels, articles, logiciels de cours) et d'autre part, la gamification de l'apprentissage, dont l'influence sur les scores PISA suit une trajectoire
+L'étude de la cohérence interne des usages numériques liés à l'apprentissage révèle une hétérogénéité des pratiques. Si l'Alpha de Cronbach global de l'échelle est limité ($0,57$), l'analyse détaillée est révélatrice. L'Alpha « en cas de suppression » permet d'identifier si une variable perturbe la cohérence globale : si l'indice augmente de façon importante lorsqu'on retire une variable, cela signifie qu'elle ne mesure pas la même dimension que les autres. Ici, l'item relatif aux jeux numériques éducatifs agit comme un facteur de dissonance. Son retrait permettrait à lui seul de porter la fiabilité de l'échelle des ressources classiques à $0,68$. Cette divergence statistique nous conduit à traiter séparément deux dimensions de l'usage numérique : d'une part, les ressources pédagogiques structurées (manuels, articles, logiciels de cours) et d'autre part, les jeux numériques  à visée éducative, dont l'influence sur les scores PISA suit une trajectoire propre.
 
 ```{r}
+#| echo: false
 #| label: tbl-alpha-cronbach-si-retrait
 #| fig-cap: "Alpha de Cronbach sur les jeux et ressources éducatives"
 
@@ -130,9 +160,10 @@ flextable(tab_fiabilite_2) %>%
 
 L'analyse des données de l'enquête PISA met en évidence une relation en « U inversé » entre la fréquence d'utilisation des ressources numériques pédagogiques et le score moyen des élèves en mathématiques, sciences et compréhension de l'écrit. Si une utilisation modérée des outils numériques, tant à l'école qu'en dehors, semble corrélée à une amélioration des performances, un effet de saturation apparaît au-delà d'un certain seuil d'intensité. Le point d'inflexion se situe autour du niveau 4 (correspondant à une utilisation modérée) sur l'échelle de fréquence normalisée : à ce stade, les élèves obtiennent les scores les plus élevés, atteignant en moyenne près de 470 points. Passé ce seuil, on observe un décrochage significatif de la performance, le score moyen chutant sous les 430 points pour les utilisateurs les plus intensifs (niveau 8 et 9).
 
-Il convient toutefois de distinguer la nature des activités numériques. L'usage des jeux vidéo à des fins éducatives présente une trajectoire singulière : il ne bénéficie pas de la même dynamique de progression initiale que les autres ressources pédagogiques et décline de manière plus linéaire à mesure que la fréquence augmente. Cette distinction est confirmée par les tests de cohérence interne (Alpha de Cronbach de 0,68 après retrait de la variable), suggérant que les pratiques de « gamification » constituent une dimension comportementale distincte de l'usage des ressources numériques classiques dans le processus d'apprentissage.
+Il convient toutefois de distinguer la nature des activités numériques. L'usage des jeux vidéo à des fins éducatives présente une trajectoire singulière : il ne bénéficie pas de la même dynamique de progression initiale que les autres ressources pédagogiques et décline de manière plus linéaire à mesure que la fréquence augmente. Cette distinction est confirmée par les tests de cohérence interne (Alpha de Cronbach de 0,68 après retrait de la variable), suggérant que les pratiques de jeux numériques constituent une dimension comportementale distincte de l'usage des ressources numériques classiques dans le processus d'apprentissage.
 
 ```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
+#| echo: false
 #| label: fig-relation-freq-usage-perf-scolaire
 #| fig-cap: "Relation entre fréquence d'usage des technologies et les performances scolaires"
 
@@ -193,7 +224,7 @@ ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Type_Act
     x = "Fréquence d'utilisation (Échelle normalisée de 1 à 9)",
     y = "Score Moyen PISA",
     color = "Type d'activité numérique",
-    caption = "Source : Données PISA 2022 | Champ : Élèves de 15 ans des 81 pays \nNote de lecture : L'usage des jeux (en pointillés) présente une baisse quasi continue."
+    caption = "Source : Données PISA 2022\n Champ : Élèves de 15 ans des 81 pays \nNote de lecture : L'usage des jeux (en pointillés) présente une baisse quasi continue."
   ) +
   
   theme_minimal(base_size = 12) +
