@@ -257,7 +257,6 @@ flextable(tableau_acces) %>%
   ) %>%
   add_footer_lines("Source : PISA 2022\nChamp : Élèves de 15 ans des 81 pays participants\nNote de lecture : Selon les données PISA 2022, 90,2 % des élèves de 15 ans issus des 81 pays participants déclarent disposer d'un accès à Internet à leur domicile.") %>%
   # ── Style typographique aligné sur le graphique de référence ──────────────
-  font(fontname = "Arial", part = "all") %>%
   fontsize(size = 11, part = "body") %>%
   fontsize(size = 11, part = "header") %>%
   bold(part = "header") %>%
@@ -286,7 +285,7 @@ Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique 
 ```         
 ```
 
-```{r, warning=FALSE, results='hide'}
+```{r}
 #| label: fig-carte-usage
 #| fig-cap: "Intensité moyenne d'utilisation des ressources numériques à l'école par pays"
 #| warning: false
@@ -479,7 +478,6 @@ flextable(table1) %>%
     Correlation = "Corrélation Moyenne (r)"
   ) %>%
   set_caption("Tableau 1 : Indices de cohérence interne et corrélations des disciplines PISA") %>%
-  font(fontname = "Arial", part = "all") %>%
   fontsize(size = 11, part = "body") %>%
   fontsize(size = 11, part = "header") %>%
   bold(part = "header") %>%
@@ -553,7 +551,6 @@ flextable(tab_fiabilite_2) %>%
   ) %>%
   set_caption("Tableau 2 : Test de cohérence des indicateurs d'apprentissage numérique") %>%
   add_footer_lines("Source : Données PISA\nChamp : Élèves de 15 ans issus des 81 pays et économies participants.\nNote de lecture : L'Alpha de Cronbach global pour l'ensemble des usages numériques est de 0,575.") %>%
-  font(fontname = "Arial", part = "all") %>%
   fontsize(size = 11, part = "body") %>%
   fontsize(size = 11, part = "header") %>%
   bold(part = "header") %>%
