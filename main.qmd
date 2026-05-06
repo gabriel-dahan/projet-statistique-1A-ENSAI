@@ -16,8 +16,13 @@ format:
       \usepackage{indentfirst}
       \setlength{\parindent}{1.5em}
       
-      \usepackage{titlesec}
+      \usepackage{caption}
+      \captionsetup[figure]{
+        labelfont={color=pale-red, bf},
+        textfont={color=pale-red}
+      }
       
+      \usepackage{titlesec}
       % Titres
       \titleformat{\chapter}[hang]
         {\normalfont\Large\bfseries\color{pale-red}}
@@ -169,7 +174,6 @@ responses <- readRDS("clean_stu_qqq.rds")
 
 ## 0.1. Enquête PISA : présentation des données
 
-
 L'évaluation PISA est une vaste enquête menée sous l'égide de l'OCDE tous les trois ans depuis l'an 2000. Elle a pour objectif principal d'évaluer les compétences des élèves de 15 ans (qui arrivent généralement en fin de scolarité obligatoire) dans trois domaines fondamentaux : la compréhension de l'écrit, la culture mathématique et la culture scientifique.
 
 Contrairement à des évaluations classiques, PISA ne se concentre pas uniquement sur la restitution des programmes scolaires, mais évalue plutôt l'aptitude des élèves à raisonner, formuler, employer et interpréter des concepts pour résoudre des problèmes ancrés dans des situations du monde réel.
@@ -178,52 +182,7 @@ L'édition de 2022 a impliqué 690 000 élèves issus de 81 pays. À chaque cycl
 
 Le test se déroule sur ordinateur. Il est composé de plusieurs unités ancrées dans des contextes de la vie réelle (personnels, professionnels, sociétaux ou scientifiques) et propose différents formats de réponses, notamment des questions à choix multiple et des questions à réponse construite ouverte. En plus des compétences scolaires, PISA s'intéresse à l'environnement des élèves en récoltant des données sur leur accès aux équipements (comme les technologies numériques) et leur indice de statut économique, social et culturel afin d'analyser les facteurs modérateurs de la réussite.
 
-Dans le cadre du projet statistique analysant les données PISA, les variables d'intérêt étudiées se divisent en deux grandes catégories principales : celles liées aux technologies et leurs utilisations, et celles mesurant les performances éducatives.
-
-
-**Les variables liées aux technologies et à l'équipement** Ce groupe permet de quantifier l'accès matériel, ainsi que la fréquence, le contexte (école ou domicile) et le but (apprentissage ou loisir) de l'utilisation des outils numériques.
-
-\* `internet_access_available` : Indique si l'élève a accès à Internet chez lui.
-
-\* `computer_for_work_available` : Indique si un ordinateur est disponible pour le travail scolaire à domicile.
-
-\* `educational_apps_available` : Indique la présence d'applications éducatives au domicile.
-
-\* `nb_digital_devices_at_home` : Quantifie le nombre total d'appareils numériques disponibles au domicile.
-
-\* `digital_resources_usage_for_learning_at_school_by_day` : Fréquence d'utilisation de ressources numériques pour l'apprentissage à l'école.
-
-\* `digital_resources_usage_for_learning_outside_school_by_day` : Fréquence d'utilisation de ressources numériques pour l'apprentissage hors de l'école (en semaine).
-
-\* `digital_resources_usage_for_learning_on_weekends` : Fréquence d'utilisation de ressources numériques pour l'apprentissage le week-end.
-
-\* `digital_games_usage_for_learning` : Fréquence d'utilisation de jeux numériques à des fins éducatives.
-
-\* `digital_resources_usage_for_leisure_at_school_by_day` : Fréquence d'utilisation de ressources numériques pour les loisirs à l'école.
-
-\* `digital_resources_usage_for_leisure_outside_school_by_day` : Fréquence d'utilisation de ressources numériques pour les loisirs hors de l'école (en semaine).
-
-\* `digital_resources_usage_for_leisure_on_weekends` : Fréquence d'utilisation de ressources numériques pour les loisirs le week-end.
-
-
-**Les variables de performance et de contrôle** Ces variables servent à évaluer la réussite scolaire des élèves et à contrôler les biais sociodémographiques.
-
-\* `pv_math` : Score de l'élève en culture mathématique.
-
-\* `pv_reading_comprehension` : Score de l'élève en compréhension de l'écrit.
-
-\* `pv_science` : Score de l'élève en culture scientifique.
-
-\* `country` : Pays d'origine de l'élève (code à 3 lettres).
-
-\* `index_socioeconomic_status` : Indice de statut économique, social et culturel (ESCS).
-
-\* `gender` : Sexe de l'élève.
-
-\* `birth_year` : Année de naissance.
-
-\* `academic_lvl` : Niveau d'étude ou classe actuelle de l'élève (Grade).
-
+Dans le cadre du projet statistique analysant les données PISA, les variables explicatives étudiées sont celles liées aux technologies et leurs utilisations. En effet l'accès au matériel numérique est un enjeu mais sont utilisation l'est aussi. Les variables d'intéret sont elles consacrées à la performance des éleves, ces variables sont des *potential values (valeurs potentielles)* des scores des élèves au test. Il est difficile pour tout les pays de faire passer à leur élèves le test entier et donc ces valeurs sont une interpolation de leurs résultats basée sur la partie du test qu'ils ont passé. Enfin les variables de contrôle sont celles qui rapporte au différents biais socio-économiques recensés dans la base de donnée PISA qui nous permettront de nuancer les résultats obtenus en les intégrants au modèle.
 
 ## 0.2 L'accès matériel : une fracture résorbée ?
 
@@ -279,13 +238,12 @@ flextable(tableau_acces) %>%
   align(j = 1, align = "left", part = "all") %>%
   autofit()
 ```
+
 \newpage
- 
+
 ## 0.3. La cartographie mondiale des usages
 
 Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique de ces outils varie d'un système éducatif à l'autre. La cartographie de l'utilisation moyenne des ressources numériques à l'école met en évidence des clivages géographiques (@fig-carte-usage). Ces disparités nationales rappellent que l'accès au numérique est avant tout le fruit de politiques éducatives, offrant ainsi un cadre très hétérogène à l'évaluation des performances.
-
-
 
 ```{r}
 #| label: fig-carte-usage
@@ -396,7 +354,7 @@ etiquettes <- responses_escs %>%
   ungroup() %>%
   filter(
     Classe_Equipement == "Plus de 6 appareils",
-    ESCS_quartile %in% c("Q1 (Modeste)", "Q4 (Favorisé)")
+    ESCS_quartile %in% c("Q1 (Modeste)","Q2","Q3", "Q4 (Favorisé)")
   ) %>%
   mutate(
     ymid  = (prop / 2), 
@@ -533,8 +491,7 @@ print(resultat_alpha$alpha.drop)
 
 ### Différence entre deux types de technologie.
 
-L'étude de la cohérence interne des usages numériques liés à l'apprentissage révèle une hétérogénéité des pratiques. Si l'Alpha de Cronbach global de l'échelle est limité ($0,57$), l'analyse détaillée est révélatrice. L'Alpha « en cas de suppression » permet d'identifier si une variable perturbe la cohérence globale : si l'indice augmente de façon importante lorsqu'on retire une variable, cela signifie qu'elle ne mesure pas la même dimension que les autres. Ici, l'item relatif aux jeux numériques éducatifs agit comme un facteur de dissonance. Son retrait permettrait à lui seul de porter la fiabilité de l'échelle des ressources classiques à $0,68$. Cette divergence statistique nous conduit à traiter séparément deux dimensions de l'usage numérique : d'une part, les ressources pédagogiques structurées (manuels, articles, logiciels de cours) et d'autre part, les jeux numériques à visée éducative, dont l'influence sur les scores PISA suit une trajectoire propre.
-\newpage
+L'étude de la cohérence interne des usages numériques liés à l'apprentissage révèle une hétérogénéité des pratiques. Si l'Alpha de Cronbach global de l'échelle est limité ($0,57$), l'analyse détaillée est révélatrice. L'Alpha « en cas de suppression » permet d'identifier si une variable perturbe la cohérence globale : si l'indice augmente de façon importante lorsqu'on retire une variable, cela signifie qu'elle ne mesure pas la même dimension que les autres. Ici, l'item relatif aux jeux numériques éducatifs agit comme un facteur de dissonance. Son retrait permettrait à lui seul de porter la fiabilité de l'échelle des ressources classiques à $0,68$. Cette divergence statistique nous conduit à traiter séparément deux dimensions de l'usage numérique : d'une part, les ressources pédagogiques structurées (manuels, articles, logiciels de cours) et d'autre part, les jeux numériques à visée éducative, dont l'influence sur les scores PISA suit une trajectoire propre. \newpage
 
 ```{r}
 #| echo: false
@@ -664,16 +621,9 @@ ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Type_Act
   )
 ```
 
-
 Il convient toutefois de distinguer la nature des activités numériques. L'usage des jeux vidéo à des fins éducatives présente une trajectoire singulière : il ne bénéficie pas de la même dynamique de progression initiale que les autres ressources pédagogiques et décline de manière plus linéaire à mesure que la fréquence augmente. Cette distinction est confirmée par les tests de cohérence interne (Alpha de Cronbach de 0,68 après retrait de la variable), suggérant que les pratiques de jeux numériques constituent une dimension comportementale distincte de l'usage des ressources numériques classiques dans le processus d'apprentissage.
 
-Il est important de préciser en préambule que l’échelle de fréquence utilisée en abscisse (de
-1 à 9) correspond aux modalités brutes du questionnaire PISA (allant de « Jamais » à « Tous
-les jours »). Aucun traitement ni recodage n’a été effectué sur ces données de fréquence de
-notre part, à l’exception des jeux numériques dont l’échelle originelle, qui était de 1 à 5, a été
-mathématiquement normalisée sur 9 niveaux afin de permettre une stricte comparabilité visuelle
-sur un même graphique.
-
+Il est important de préciser en préambule que l’échelle de fréquence utilisée en abscisse (de 1 à 9) correspond aux modalités brutes du questionnaire PISA (allant de « Jamais » à « Tous les jours »). Aucun traitement ni recodage n’a été effectué sur ces données de fréquence de notre part, à l’exception des jeux numériques dont l’échelle originelle, qui était de 1 à 5, a été mathématiquement normalisée sur 9 niveaux afin de permettre une stricte comparabilité visuelle sur un même graphique.
 
 # 2 \| Les facteurs modérateurs de la performance
 
@@ -848,6 +798,7 @@ ggplot(df_plot, aes(x = factor(Modalite), y = Proportion, fill = Sexe)) +
     axis.title = element_text(face = "bold")
   )
 ```
+
 \newpage
 
 ### Etude de la dynamique de la courbes modulée par l'année d'étude des élèves.
@@ -958,8 +909,6 @@ ggplot(synthese_niveau, aes(
   guides(color = guide_legend(ncol = 2, title.position = "top"))
 ```
 
-
-
 ## 2.2. La nature de l'usage
 
 L'intégration des usages numériques strictement récréatifs au sein de notre analyse permet de nuancer fortement l'impact du temps d'écran sur les performances académiques et de révéler des comportements très contrastés selon le contexte. Contrairement à la dynamique strictement descendante et linéaire observée pour les jeux éducatifs, qui pénalisent l'élève de manière continue, les usages de loisirs en dehors du cadre scolaire (le week-end et en semaine hors de l'école) dessinent une trajectoire en cloche tout à fait inattendue. De manière contre-intuitive, le non-usage numérique totale sur le temps libre (fréquence 1) n'est pas corrélée aux meilleurs résultats ; au contraire, ces élèves affichent des scores initiaux assez faibles. Les courbes révèlent qu'une utilisation modérée à régulière de ces ressources récréatives (se situant autour des niveaux 4 à 6 sur notre échelle) est associée aux scores PISA les plus élevés, culminant au-delà des 480 points. Ce phénomène suggère qu'une pratique de loisir mesurée (réseaux sociaux, vidéos, communication) fait aujourd'hui partie intégrante de la socialisation et de l'équilibre des adolescents, participant potentiellement à un bien-être général favorable à l'apprentissage. Bien entendu, passé ce seuil, l'hyper-connexion récréative à domicile (niveaux 8 et 9) finit par exercer un effet délétère, la surcharge d'écran empiétant inévitablement sur le temps de sommeil, de lecture ou de travail personnel, ce qui entraîne une rechute marquée des performances.
@@ -1043,14 +992,15 @@ ggplot(synthese_graphique_mixte, aes(x = Frequence, y = Note_Moyenne, color = Ty
   )
 ```
 
-Au terme de cette analyse, il apparaît que les approches bivariées, bien qu'essentielles pour identifier la relation en « U inversé » entre le numérique et les scores PISA , ne suffisent pas à saisir l'entière complexité des trajectoires individuelles des élèves. La réussite éducative ne dépend pas d'un facteur isolé, mais d'un système d'interactions complexes entre l'intensité d'usage, la nature de l'activité pédagogique ou récréative et le contexte spatial de consommation, qu'il soit scolaire ou domestique . 
+Au terme de cette analyse, il apparaît que les approches bivariées, bien qu'essentielles pour identifier la relation en « U inversé » entre le numérique et les scores PISA , ne suffisent pas à saisir l'entière complexité des trajectoires individuelles des élèves. La réussite éducative ne dépend pas d'un facteur isolé, mais d'un système d'interactions complexes entre l'intensité d'usage, la nature de l'activité pédagogique ou récréative et le contexte spatial de consommation, qu'il soit scolaire ou domestique .
 
-L’Analyse des Correspondances Multiples (ACM) s’impose alors comme l’outil de synthèse idéal pour cartographier ces interactions au sein d’un espace factoriel unique, permettant de dépasser l'opposition binaire entre intensifs et non-usagers pour identifier les conditions réelles d'un dosage numérique optimal. Afin de garantir une lisibilité statistique rigoureuse, nous avons fait le choix de discrétiser les échelles de fréquence initiales en trois modalités (Faible, Modéré et Intensif) et de projeter, en variables illustratives, le statut socio-économique (ESCS) ainsi que la performance scolaire découpée en quartiles (Q1 à Q4) . 
+L’Analyse des Correspondances Multiples (ACM) s’impose alors comme l’outil de synthèse idéal pour cartographier ces interactions au sein d’un espace factoriel unique, permettant de dépasser l'opposition binaire entre intensifs et non-usagers pour identifier les conditions réelles d'un dosage numérique optimal. Afin de garantir une lisibilité statistique rigoureuse, nous avons fait le choix de discrétiser les échelles de fréquence initiales en trois modalités (Faible, Modéré et Intensif) et de projeter, en variables illustratives, le statut socio-économique (ESCS) ainsi que la performance scolaire découpée en quartiles (Q1 à Q4) .
 
 Cette démarche vise à vérifier si l'excellence académique, représentée par notre indicateur multidimensionnel dont la cohérence interne a été validée ($\alpha > 0,93$), gravite effectivement autour d'un pôle de régulation des usages plutôt que vers le non-usage ou l'hyper-connexion . Le plan factoriel qui suit oppose ainsi une Dimension 1 caractérisant l'intensité globale d'équipement et d'usage à une Dimension 2 révélant la qualité du dosage numérique, mettant notamment en lumière le caractère particulièrement pénalisant des loisirs intensifs au sein de l'établissement . En définitive, cette carte statistique constitue la preuve visuelle que la fracture numérique contemporaine ne réside plus dans le manque de matériel, mais bien dans la maîtrise comportementale de l'outil comme levier d'apprentissage .
 
 ```{r}
-#| label: acm-charte-graphique
+#| label: fig-acm-num-perf
+#| fig-cap: "ACM des variables de fréquence d'usage du numérique"
 #| fig-width: 12
 #| fig-height: 9
 
@@ -1150,7 +1100,7 @@ p +
   )
 ```
 
-La Dimension 1 (20,9 %) oppose, de gauche à droite, les élèves peu connectés aux élèves très connectés : les modalités « Faible » se regroupent à gauche du plan tandis que les modalités « Intensif » se projettent très à droite. La Dimension 2 (16,4 %) introduit une nuance qualitative : elle ne distingue plus combien l'élève utilise le numérique, mais comment. Les usages intensifs non régulés, au premier rang desquels Lei_Sch_Intensif (utilisation des ressources numériques intensif à des fins de loisirs à l'école), dont la position extrême en haut à droite du plan signale le caractère le plus atypique de l'ensemble, s'opposent verticalement aux usages modérés et structurés (Lrn_Sch_Modéré : utilisation des ressources numériques modéré pour l’apprentissage à l’école , Lrn_Out_Modéré : utilisation des ressources numériques modéré pour l’apprentissage en dehors de l’école, Lei_Wkd_Modéré : utilisation des ressources numériques modéré pour les loisirs le week-end), concentrés dans la partie inférieure. 
+La Dimension 1 (20,9 %) oppose, de gauche à droite, les élèves peu connectés aux élèves très connectés : les modalités « Faible » se regroupent à gauche du plan tandis que les modalités « Intensif » se projettent très à droite. La Dimension 2 (16,4 %) introduit une nuance qualitative : elle ne distingue plus combien l'élève utilise le numérique, mais comment. Les usages intensifs non régulés, au premier rang desquels Lei_Sch_Intensif (utilisation des ressources numériques intensif à des fins de loisirs à l'école), dont la position extrême en haut à droite du plan signale le caractère le plus atypique de l'ensemble, s'opposent verticalement aux usages modérés et structurés (Lrn_Sch_Modéré : utilisation des ressources numériques modéré pour l’apprentissage à l’école , Lrn_Out_Modéré : utilisation des ressources numériques modéré pour l’apprentissage en dehors de l’école, Lei_Wkd_Modéré : utilisation des ressources numériques modéré pour les loisirs le week-end), concentrés dans la partie inférieure.
 
 On observe que le Q4 (Excellent) se positionne dans la zone négative de la Dimension 2, aux côtés des modalités modérées d'apprentissage, tandis que Q1 (Faible) gravite proche des modalités faibles d’apprentissage et intensives de loisir. Cette disposition confirme que la performance académique n'est pas associée au non-usage du numérique, mais à une régulation maîtrisée des usages. À l'inverse, Lei_Sch_Intensif occupe la position la plus excentrée du plan (en haut à droite), signalant qu'il constitue le profil le plus pénalisant pour la performance. L'ESCS, projeté comme variable quantitative supplémentaire, s'aligne légèrement sur l'axe horizontal en direction des modalités modérées, suggérant qu'un statut socio-économique favorable tend à être associé à des usages plus régulés.
 
@@ -1162,8 +1112,9 @@ La détermination du nombre optimal de clusters ($k$) repose en premier lieu sur
 
 ```{r}
 #| label: diagnostic-kmeans
+#| fig-cap: Méthode du coude(détermination du nombre de classes)
 library(factoextra)
-
+set.seed(43)
 # On travaille sur les coordonnées de l'ACM (les 5 premières dimensions)
 ind_coords <- as.data.frame(res.mca$ind$coord[, 1:5])
 
@@ -1172,16 +1123,24 @@ ind_coords <- as.data.frame(res.mca$ind$coord[, 1:5])
 fviz_nbclust(ind_coords, kmeans, method = "wss") +
   labs(title = "Méthode du Coude", subtitle = "Le point d'inflexion indique le k optimal")
 ```
-En complément, la méthode de la silhouette permet d'évaluer la qualité de la segmentation en mesurant la distance entre chaque individu et les autres membres de son cluster par rapport aux clusters voisins. Sur le graphique, le score le plus élevé indique mathématiquement le $k$ optimal pour lequel les individus sont les mieux assignés à leur groupe. Si ce coefficient suggère ici une segmentation plus fine en 8 groupes, nous avons privilégié interprétabilité sociologique en retenant la partition à 3 clusters. Ce choix permet une symétrie parfaite avec notre typologie d'intensité d'usage (Faible, Modéré, Intensif) tout en capturant l'essentiel de l'hétérogénéité des comportements numériques.
+
+En complément, la méthode de la silhouette permet d'évaluer la qualité de la segmentation en mesurant la distance entre chaque individu et les autres membres de son cluster par rapport aux clusters voisins. Sur le graphique, le score le plus élevé indique mathématiquement le $k$ optimal pour lequel les individus sont les mieux assignés à leur groupe. Si ce coefficient suggère ici une segmentation très fines, nous avons privilégié interprétabilité sociologique en retenant la partition à 3 clusters. Ce choix permet une symétrie parfaite avec notre typologie d'intensité d'usage (Faible, Modéré, Intensif) tout en capturant l'essentiel de l'hétérogénéité des comportements numériques.
+
 ```{r}
 # 2. Graphique de la Silhouette
 # On cherche le pic (la valeur la plus haute)
+#| label: diagnostic-kmeans-1
+#| fig-cap: Méthode de la silhouette(détermination du nombre de classes)
+set.seed(43)
 fviz_nbclust(ind_coords, kmeans, method = "silhouette") +
   labs(title = "Méthode de la Silhouette", subtitle = "Le score le plus haut indique le k optimal")
 ```
-Cette segmentation de la population, issue de l'application de l'algorithme des K-means sur les coordonnées factorielles de l'ACM, permet d'identifier trois profils d'élèves aux trajectoires académiques contrastées. 
+
+Cette segmentation de la population, issue de l'application de l'algorithme des K-means sur les coordonnées factorielles de l'ACM, permet d'identifier trois profils d'élèves aux trajectoires académiques contrastées.
+
 ```{r}
 #| label: clustering-pisa-final-bombproof
+#| fig-cap: Visualisation des groupes issus de l'algorythme K-means
 
 # 1. Nettoyage et calcul du score
 set.seed(42)
@@ -1237,19 +1196,18 @@ table_profils <- data_base %>%
   ) %>%
   arrange(desc(Score_Moyen))
 
-print(table_profils)
-
 # Visualisation finale
 fviz_mca_ind(res.mca, label = "none", habillage = data_base$Cluster, 
-             palette = "jco", addEllipses = TRUE, title = "Classification ACM (3 groupes)")
+             palette = "jco", addEllipses = TRUE, title = "Classification par méthode K-means (3 groupes)")
 ```
 
-Le Cluster 1, qui regroupe 8 536 élèves, incarne le pôle de la réussite équilibrée avec le score moyen le plus élevé de l'étude, soit 471 points ; il se distingue par un statut socio-économique (ESCS) supérieur à la moyenne (-0,11) et un usage récréatif à l'école très modéré de 2,49, abritant ainsi la plus forte concentration d'élèves du quartile Q4. Le Cluster 2 qui compte 5 531 élèves représente le pôle avec la performance la plus faible (423 points) ; ce groupe cumule un usage numérique très restreint (1,59 à l'école) et le statut socio-économique le plus précarisé de l'échantillon (-0,49) , démontrant qu'une faible exposition technologique, lorsqu'elle est couplée à une précarité sociale, ne garantit nullement une performance accrue et mène une part significative d'élèves en difficulté (Q1). Entre ces deux groupes, le Cluster 3 (3 054 élèves) révèle la toxicité de la distraction numérique : malgré un capital socio-économique (-0,15) quasiment identique à celui du premier groupe, ces élèves subissent un décrochage avec un score moyen de 453 points en raison d'une fréquence d'usage récréatif à l'école nettement plus soutenue (4,18) , ce qui se traduit par une proportion plus importante d'élèves situés dans le premier quartile de score. 
+Le Cluster 1, qui regroupe 8 536 élèves, incarne le pôle de la réussite équilibrée avec le score moyen le plus élevé de l'étude, soit 471 points ; il se distingue par un statut socio-économique (ESCS) supérieur à la moyenne (-0,11) et un usage récréatif à l'école très modéré de 2,49, abritant ainsi la plus forte concentration d'élèves du quartile Q4. Le Cluster 2 qui compte 5 531 élèves représente le pôle avec la performance la plus faible (423 points) ; ce groupe cumule un usage numérique très restreint (1,59 à l'école) et le statut socio-économique le plus précarisé de l'échantillon (-0,49) , démontrant qu'une faible exposition technologique, lorsqu'elle est couplée à une précarité sociale, ne garantit nullement une performance accrue et mène une part significative d'élèves en difficulté (Q1). Entre ces deux groupes, le Cluster 3 (3 054 élèves) révèle la toxicité de la distraction numérique : malgré un capital socio-économique (-0,15) quasiment identique à celui du premier groupe, ces élèves subissent un décrochage avec un score moyen de 453 points en raison d'une fréquence d'usage récréatif à l'école nettement plus soutenue (4,18) , ce qui se traduit par une proportion plus importante d'élèves situés dans le premier quartile de score.
 
 En définitive, cette typologie confirme que la réussite éducative ne dépend pas d'une durée globale de connexion mais d'une maîtrise comportementale de l'outil ; elle souligne que le capital socio-culturel et l'encadrement éducatif demeurent les clés essentielles pour transformer l'environnement technologique en levier d'apprentissage plutôt qu'en piège cognitif , déplaçant ainsi l'enjeu de la fracture numérique du simple accès matériel vers la capacité de l'élève à maintenir un dosage numérique modéré.
 
 ```{r}
 #| label: clustering-pisa-perf-projection
+#| fig-cap: Composition des groupes
 
 library(FactoMineR)
 library(factoextra)
@@ -1338,8 +1296,7 @@ Pour conclure, nos analyses mettent en évidence que l’impact des technologies
 
 D’une part, nous confirmons l’existence d’un point de bascule statistique pour les ressources pédagogiques classiques. Une utilisation modérée s’avère corrélée aux meilleurs scores académiques (autour du niveau 4 de l’échelle d’utilisation), tandis que l’hyper-connexion entraîne un décrochage significatif sous les 430 points. D’autre part, la nature de l’usage dicte des trajectoires radicalement différentes. L’utilisation de jeux numérique pour l’apprentissage (jeux éducatifs) se révèle être une pratique strictement pénalisante, indépendamment du niveau de l’élève. À l’inverse, l’usage récréatif toléré à domicile semble participer à un équilibre favorable, tant qu’il ne franchit pas les portes de la salle de classe, où son irruption provoque la détérioration académique la plus sévère de notre étude.
 
-Enfin, la vulnérabilité face à ce point de bascule est fortement modulée par des facteurs modérateurs sociologiques et académiques. Les élèves des classes supérieures Grades 11 et 12) ainsi que les garçons montrent une sensibilité et un risque de chute académique nettement plus élevés en cas de surconsommation numérique.
-En définitive, la fracture numérique d’aujourd’hui ne se situe plus dans le manque de matériel, mais dans la maîtrise comportementale de l’outil. Le capital socio-culturel et l’encadrement éducatif demeurent les véritables clés permettant de transformer un environnement technologique riche en un levier d’apprentissage plutôt qu’en un piège cognitif. Pour les politiques publiques, l’urgence n’est donc plus d’équiper les établissements, mais de concevoir une éducation à l’attention du numérique.
+Enfin, la vulnérabilité face à ce point de bascule est fortement modulée par des facteurs modérateurs sociologiques et académiques. Les élèves des classes supérieures Grades 11 et 12) ainsi que les garçons montrent une sensibilité et un risque de chute académique nettement plus élevés en cas de surconsommation numérique. En définitive, la fracture numérique d’aujourd’hui ne se situe plus dans le manque de matériel, mais dans la maîtrise comportementale de l’outil. Le capital socio-culturel et l’encadrement éducatif demeurent les véritables clés permettant de transformer un environnement technologique riche en un levier d’apprentissage plutôt qu’en un piège cognitif. Pour les politiques publiques, l’urgence n’est donc plus d’équiper les établissements, mais de concevoir une éducation à l’attention du numérique.
 
 # Références
 
@@ -1353,9 +1310,53 @@ OCDE. 2015. Connectés pour apprendre : les élèves et la technologie. Organisa
 
 Cronbach, L. J. (1951). Coefficient alpha and the internal structure of tests. Psychometrika
 
-
 # Annexe
 
+## Variables d'étude
+
+**Les variables explicatives.** Ce groupe permet de quantifier l'accès matériel, ainsi que la fréquence, le contexte (école ou domicile) et le but (apprentissage ou loisir) de l'utilisation des outils numériques.
+
+\* `internet_access_available` : Indique si l'élève a accès à Internet chez lui.
+
+\* `computer_for_work_available` : Indique si un ordinateur est disponible pour le travail scolaire à domicile.
+
+\* `educational_apps_available` : Indique la présence d'applications éducatives au domicile.
+
+\* `nb_digital_devices_at_home` : Quantifie le nombre total d'appareils numériques disponibles au domicile.
+
+\* `digital_resources_usage_for_learning_at_school_by_day` : Fréquence d'utilisation de ressources numériques pour l'apprentissage à l'école.
+
+\* `digital_resources_usage_for_learning_outside_school_by_day` : Fréquence d'utilisation de ressources numériques pour l'apprentissage hors de l'école (en semaine).
+
+\* `digital_resources_usage_for_learning_on_weekends` : Fréquence d'utilisation de ressources numériques pour l'apprentissage le week-end.
+
+\* `digital_games_usage_for_learning` : Fréquence d'utilisation de jeux numériques à des fins éducatives.
+
+\* `digital_resources_usage_for_leisure_at_school_by_day` : Fréquence d'utilisation de ressources numériques pour les loisirs à l'école.
+
+\* `digital_resources_usage_for_leisure_outside_school_by_day` : Fréquence d'utilisation de ressources numériques pour les loisirs hors de l'école (en semaine).
+
+\* `digital_resources_usage_for_leisure_on_weekends` : Fréquence d'utilisation de ressources numériques pour les loisirs le week-end.
+
+**Les variables d'interets.** Ces variables servent à évaluer la réussite scolaire des élèves.
+
+\* `pv_math` : Score de l'élève en culture mathématique.
+
+\* `pv_reading_comprehension` : Score de l'élève en compréhension de l'écrit.
+
+\* `pv_science` : Score de l'élève en culture scientifique.
+
+**Les variables de contrôle**. Ces variables nuancer les résultats obtenus en controlant les variables explicatives par des biais socio-économique
+
+\* `country` : Pays d'origine de l'élève (code à 3 lettres).
+
+\* `index_socioeconomic_status` : Indice de statut économique, social et culturel (ESCS).
+
+\* `gender` : Sexe de l'élève.
+
+\* `birth_year` : Année de naissance.
+
+\* `academic_lvl` : Niveau d'étude ou classe actuelle de l'élève (Grade).
 
 ## ACM des variables d'intérêt
 
@@ -1458,6 +1459,12 @@ ggplot(graph1_var, aes(x = Note, fill = Matieres, color = Matieres)) +
 Les scores des trois disciplines suivent une répartition gaussienne classique : le fait le plus marquant est la superposition presque parfaite des trois courbes. Cela indique que le niveau de difficulté global et la notation des tests PISA sont très bien étalonnés d'une matière à l'autre.
 
 Bien que les trois courbes se superposent au niveau global, le graphique ne nous dit absolument pas si un élève excellent en mathématiques est le même que celui qui excelle en sciences. Il affiche des moyennes de groupes, pas des profils individuels : c'est la raison pour laquelle nous introduisons dans la partie 1 l'Alpha de Conbach.
+
+## Poursuite d'étude de l'influence du genre et du niveau académique sur les performances scolaire.
+
+Les 3 graphiques suivant font suite à la partie 2. En effet après avoir inclu des variables de contrôle comme le genre ou le niveau académique dans les graphiques de performance en fonction de l'utilisation du numérique à but éducatif, nous sommes parvenu à la conclusion que ces variables influent les résultats : une relation en cloche plus prononcée chez les hommes et les personnes avec un haut niveaux académique.
+
+Les résultats sont similaire sur l'utilisation du numérique récréatif, les courbes ont plus d'amplitude tant positivement que négativement chez les hommes et les persoones dont le niveaux académique est élevé.
 
 ```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 # Graphique : Usage Loisir par Sexe
