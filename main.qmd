@@ -493,8 +493,6 @@ print(resultat_alpha$total$std.alpha)
 print(resultat_alpha$alpha.drop)
 ```
 
-### Différence entre deux types de technologie.
-
 L'étude de la cohérence interne des usages numériques liés à l'apprentissage révèle une hétérogénéité des pratiques. Si l'Alpha de Cronbach global de l'échelle est limité ($0,57$), l'analyse détaillée est révélatrice. L'Alpha « en cas de suppression » permet d'identifier si une variable perturbe la cohérence globale : si l'indice augmente de façon importante lorsqu'on retire une variable, cela signifie qu'elle ne mesure pas la même dimension que les autres. Ici, l'item relatif aux jeux numériques éducatifs agit comme un facteur de dissonance. Son retrait permettrait à lui seul de porter la fiabilité de l'échelle des ressources classiques à $0,68$ (@fig-alpha-cronbach-si-retrait). Cette divergence statistique nous conduit à traiter séparément deux dimensions de l'usage numérique : d'une part, les ressources pédagogiques structurées (manuels, articles, logiciels de cours) et d'autre part, les jeux numériques à visée éducative, dont l'influence sur les scores PISA suit une trajectoire propre. \newpage
 
 ```{r}
@@ -541,9 +539,7 @@ flextable(tab_fiabilite_2) %>%
   autofit()
 ```
 
-## 1.2. L'existence d'un seuil au delà duquel les technologies sont contre-productives
-
-### Analyse de la courbe
+## 1.2. Effet de seuil et rendements décroissants de l’usage numérique
 
 L'analyse des données de l'enquête PISA met en évidence une relation en « U inversé » entre la fréquence d'utilisation des ressources numériques pédagogiques et le score moyen des élèves en mathématiques, sciences et compréhension de l'écrit. Si une utilisation modérée des outils numériques, tant à l'école qu'en dehors, semble corrélée à une amélioration des performances, un effet de saturation apparaît au-delà d'un certain seuil d'intensité [@escueta2020; @ocde2015]. Le point d'inflexion se situe autour du niveau 4 (correspondant à une utilisation modérée) sur l'échelle de fréquence normalisée : à ce stade, les élèves obtiennent les scores les plus élevés, atteignant en moyenne près de 470 points. Passé ce seuil, on observe un décrochage significatif de la performance, le score moyen chutant sous les 430 points pour les utilisateurs les plus intensifs (niveau 8 et 9)(@fig-relation-freq-usage-perf-scolaire).
 
@@ -635,9 +631,7 @@ Bien que les données mettent en évidence une relation en "cloche" entre l'usag
 
 ## 2.1. Les facteurs socio-économiques et académiques
 
-### Intégration du genre comme variable de contrôle
-
-En effet l'intégration du genre comme variable de contrôle s'avère déterminante pour affiner ce diagnostic. On observe que chez les filles, les scores demeurent plus stables et subissent un décrochage moins brutal en cas d'utilisation excessive. À l'inverse, les garçons manifestent une vulnérabilité accrue aux usages excessifs, particulièrement hors du cadre scolaire où leurs performances chutent significatement (@fig-relation-freq-usage-perf-scolaire-sexe). Cette disparité démontre que le lien entre l'exposition numérique et les performances scolaires ne sont pas uniformes mais qu'ils sont modulées par les habitudes d'usage et les comportements propres à chaque genre. Le cas des jeux numériques éducatifs est, à ce titre, exemplaire : contrairement aux autres ressources, cette activité ne présente aucun bénéfice incrémental, montrant un déclin de performance quasi linéaire dès les premiers niveaux de fréquence.
+En effet, l'intégration du genre comme variable de contrôle s'avère déterminante pour affiner ce diagnostic. On observe que chez les filles, les scores demeurent plus stables et subissent un décrochage moins brutal en cas d'utilisation excessive. À l'inverse, les garçons manifestent une vulnérabilité accrue aux usages excessifs, particulièrement hors du cadre scolaire où leurs performances chutent significatement (@fig-relation-freq-usage-perf-scolaire-sexe). Cette disparité démontre que le lien entre l'exposition numérique et les performances scolaires ne sont pas uniformes mais qu'ils sont modulées par les habitudes d'usage et les comportements propres à chaque genre. Le cas des jeux numériques éducatifs est, à ce titre, exemplaire : contrairement aux autres ressources, cette activité ne présente aucun bénéfice incrémental, montrant un déclin de performance quasi linéaire dès les premiers niveaux de fréquence.
 
 ```{r}
 control_var <- responses %>% select(country,
@@ -805,8 +799,6 @@ ggplot(df_plot, aes(x = factor(Modalite), y = Proportion, fill = Sexe)) +
 
 \newpage
 
-### Etude de la dynamique de la courbes modulée par l'année d'étude des élèves.
-
 Une étude similaire peut être effectuée en contrôlant le jeu de données par l'année d'étude. L'analyse de la superposition des classes met en évidence une différence majeure d'une année d'étude à l'autre : l'amplitude des résultats scolaires. Si l'on observe attentivement la plage de valeurs couverte par chaque courbe pour l'usage de ressources scolaires, on constate que la sensibilité au numérique s'accroît considérablement avec le niveau scolaire. Pour les élèves des classes inférieures (Grades 7 et 8), les courbes sont particulièrement plates, indiquant que la fréquence d'utilisation des écrans n'entraîne qu'une très faible variation de leurs scores PISA, qui restent confinés dans une plage étroite d'une vingtaine de points. À l'inverse, les élèves des niveaux supérieurs (Grades 11 et 12) sont nettement plus touchés par ces dynamiques comportementales. Leurs courbes affichent une dispersion (ou plage de valeurs) beaucoup plus forte, avec des chutes de performance abruptes pouvant dépasser les 50 points d'écart en cas d'usage intensif, que ce soit pour les jeux ou les ressources. Cette évolution d'année en année démontre que plus un élève est avancé scolairement, plus son score PISA est réactif ses habitudes numériques : les étudiants de haut niveau ont paradoxalement beaucoup plus de points à perdre face à une surexposition que les élèves des niveaux inférieurs, pour qui le lien entre la pratique numérique et les performances scolaires est marginal. Mais ces élèves de niveaux inférieurs profite moins de l'effet bénéfique des technologies là où ceux issus de niveaux supérieurs peuvent énormément progresser en cas d'utilisation moyenne.
 
 Rappelons que les élèves de 7e et 12e année d’étude constituent respectivement 0,4 et 2,5% de l’échantillon total d’élèves.
@@ -913,7 +905,7 @@ ggplot(synthese_niveau, aes(
   guides(color = guide_legend(ncol = 2, title.position = "top"))
 ```
 
-## 2.2. La nature de l'usage
+## 2.2. L'influence déterminante de la nature de l'usage des technologies
 
 L'intégration des usages numériques strictement récréatifs au sein de notre analyse permet de nuancer fortement le lien du temps d'écran et des performances académiques et de révéler des comportements très contrastés selon le contexte. Contrairement à la dynamique strictement descendante et linéaire observée pour les jeux éducatifs, qui pénalisent l'élève de manière continue, les usages de loisirs en dehors du cadre scolaire (le week-end et en semaine hors de l'école) dessinent une trajectoire en cloche tout à fait inattendue. De manière contre-intuitive, le non-usage numérique totale sur le temps libre (fréquence 1) n'est pas corrélée aux meilleurs résultats ; au contraire, ces élèves affichent des scores initiaux assez faibles. Les courbes révèlent qu'une utilisation modérée à régulière de ces ressources récréatives (se situant autour des niveaux 4 à 6 sur notre échelle) est associée aux scores PISA les plus élevés, culminant au-delà des 480 points. Ce phénomène suggère qu'une pratique de loisir mesurée (réseaux sociaux, vidéos, communication) fait aujourd'hui partie intégrante de la socialisation et de l'équilibre des adolescents, participant potentiellement à un bien-être général favorable à l'apprentissage. Bien entendu, passé ce seuil, l'hyper-connexion récréative à domicile (niveaux 8 et 9) finit réduire les performances, la surcharge d'écran empiétant inévitablement sur le temps de sommeil, de lecture ou de travail personnel, ce qui entraîne une rechute marquée des performances.
 
