@@ -3,6 +3,10 @@ title: ""
 format:
   pdf:
     documentclass: report
+    cite-method: biblatex
+    biblatexoptions:
+      - style=numeric
+      - sorting=nyt
     header-includes: |
       \usepackage{enumitem}
       \setlist[itemize]{label=$\bullet$}
@@ -143,11 +147,11 @@ Eliza Ghiorghita\\
 
 # Introduction
 
-Selon l’Organisation de coopération et de développement économiques (OCDE), en 2022, le gain de performance associé à une utilisation modérée des outils numériques à l’école (jusqu’à une heure par jour) s’élève en moyenne à 14 points en mathématiques par rapport aux non-utilisateurs. À l'inverse, dès que l'usage devient intensif ou génère de la distraction, les scores chutent de 15 points en moyenne. Ce phénomène est le reflet de la dualité des technologies dans le milieu scolaire : si elles offrent des opportunités de personnalisation de l'apprentissage, elles constituent également un facteur de dispersion de l’attention. La question de l’usage des écrans apparaît alors comme un enjeu essentiel, la « sur-connexion » peut devenir un facteur de renonciation aux efforts cognitifs nécessaires à la performance éducative. En 2022, trois élèves sur dix indiquent être régulièrement distraits par les écrans en classe, un taux qui souligne l'urgence de définir un cadre d'usage raisonné.
+Selon l’Organisation de coopération et de développement économiques (OCDE), en 2022, le gain de performance associé à une utilisation modérée des outils numériques à l’école (jusqu’à une heure par jour) s’élève en moyenne à 14 points en mathématiques par rapport aux non-utilisateurs. À l'inverse, dès que l'usage devient intensif ou génère de la distraction, les scores chutent de 15 points en moyenne [@ocde2015]. Ce phénomène est le reflet de la dualité des technologies dans le milieu scolaire : si elles offrent des opportunités de personnalisation de l'apprentissage, elles constituent également un facteur de dispersion de l’attention. La question de l’usage des écrans apparaît alors comme un enjeu essentiel, la « sur-connexion » peut devenir un facteur de renonciation aux efforts cognitifs nécessaires à la performance éducative. En 2022, trois élèves sur dix indiquent être régulièrement distraits par les écrans en classe, un taux qui souligne l'urgence de définir un cadre d'usage raisonné.
 
-Afin d’analyser ces enjeux, le volet consacré aux technologies de l'enquête internationale PISA 2022 fournit un cadre d'analyse pour mesurer la présence de ces outils chez les jeunes de 15 ans dans 81 pays. Dans le cadre de notre étude, nous avons fait le choix de conserver l'intégralité de ces 81 pays sans en écarter a priori, afin d'observer ces phénomènes à une échelle véritablement globale. Cette évaluation ne se limite pas aux tests de compétences en mathématiques, sciences et lecture ; elle documente également l'intensité, la nature et le contexte socio-économique des usages numériques des élèves. Afin de caractériser cet environnement numérique, l’enquête PISA s'appuie sur plusieurs indicateurs permettant de définir le profil de l'élève connecté : l’accès matériel, l’indice de statut économique, social et culturel (ESCS), l’intensité et la nature de l’usage.
+Afin d’analyser ces enjeux, le volet consacré aux technologies de l'enquête internationale PISA 2022 fournit un cadre d'analyse pour mesurer la présence de ces outils chez les jeunes de 15 ans dans 81 pays [@bernigole2022]. Dans le cadre de notre étude, nous avons fait le choix de conserver l'intégralité de ces 81 pays sans en écarter a priori, afin d'observer ces phénomènes à une échelle véritablement globale. Cette évaluation ne se limite pas aux tests de compétences en mathématiques, sciences et lecture ; elle documente également l'intensité, la nature et le contexte socio-économique des usages numériques des élèves. Afin de caractériser cet environnement numérique, l’enquête PISA s'appuie sur plusieurs indicateurs permettant de définir le profil de l'élève connecté : l’accès matériel, l’indice de statut économique, social et culturel (ESCS), l’intensité et la nature de l’usage.
 
-Nous considérons la notion d’usage numérique à travers deux dimensions : l'usage pédagogique (logiciels d'apprentissage, recherche documentaire) et l'usage récréatif. L’indice de statut économique, social et culturel (ESCS) nous servira de point d’ancrage pour comparer comment le capital culturel familial influence la capacité de l'élève à transformer l'outil en levier de réussite. Dès lors, les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau, mais des disparités d’usages au sein même des établissements. Leur existence révèle une inégale exploitation de l’outil selon le milieu
+Nous considérons la notion d’usage numérique à travers deux dimensions : l'usage pédagogique (logiciels d'apprentissage, recherche documentaire) et l'usage récréatif. L’indice de statut économique, social et culturel (ESCS) nous servira de point d’ancrage pour comparer comment le capital culturel familial influence la capacité de l'élève à transformer l'outil en levier de réussite. Dès lors, les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau, mais des disparités d’usages au sein même des établissements [@attewell2001]. Leur existence révèle une inégale exploitation de l’outil selon le milieu
 
 On peut alors se demander :
 
@@ -178,7 +182,7 @@ L'évaluation PISA est une vaste enquête menée sous l'égide de l'OCDE tous le
 
 Contrairement à des évaluations classiques, PISA ne se concentre pas uniquement sur la restitution des programmes scolaires, mais évalue plutôt l'aptitude des élèves à raisonner, formuler, employer et interpréter des concepts pour résoudre des problèmes ancrés dans des situations du monde réel.
 
-L'édition de 2022 a impliqué 690 000 élèves issus de 81 pays. À chaque cycle, un domaine est évalué de manière plus poussée. En 2022, la priorité a été donnée à la culture mathématique. En France, environ 6 700 élèves ont été tirés au sort dans 285 établissements pour assurer une représentativité nationale . La majorité de ces élèves (64,2 %) étaient scolarisés en classe de seconde générale et technologique. Le détail de l'échantillon d'élèves PISA 2022 en fonction du niveau d'étude est détaillé en annexe.
+L'édition de 2022 a impliqué 690 000 élèves issus de 81 pays. À chaque cycle, un domaine est évalué de manière plus poussée. En 2022, la priorité a été donnée à la culture mathématique. En France, environ 6 700 élèves ont été tirés au sort dans 285 établissements pour assurer une représentativité nationale [@bernigole2022]. La majorité de ces élèves (64,2 %) étaient scolarisés en classe de seconde générale et technologique. Le détail de l'échantillon d'élèves PISA 2022 en fonction du niveau d'étude est détaillé en annexe.
 
 Le test se déroule sur ordinateur. Il est composé de plusieurs unités ancrées dans des contextes de la vie réelle (personnels, professionnels, sociétaux ou scientifiques) et propose différents formats de réponses, notamment des questions à choix multiple et des questions à réponse construite ouverte. En plus des compétences scolaires, PISA s'intéresse à l'environnement des élèves en récoltant des données sur leur accès aux équipements (comme les technologies numériques) et leur indice de statut économique, social et culturel afin d'analyser les facteurs modérateurs de la réussite.
 
@@ -186,7 +190,7 @@ Dans le cadre du projet statistique analysant les données PISA, les variables e
 
 ## 0.2 L'accès matériel : une fracture résorbée ?
 
-Avant de corréler l'usage du numérique aux performances académiques, il convient de dresser un état des lieux de l'accès matériel aux outils technologiques. L'analyse descriptive de la base de données PISA révèle une démocratisation de l'équipement de base. Si l’on observe l’accès aux outils numériques de base à domicile, c’est-à-dire : une connexion internet, un ordinateur pour le travail et d'applications éducatives, on constate qu'une très vaste majorité d'élèves (plus de $85\%$ en moyenne globale) dispose de ces outils à domicile. Ce niveau d'équipement primaire confirme notre postulat initial : les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau. L'enjeu de l'inégalité se déplace de la possession de l’outil vers la capacité de l’élève à l’exploiter.
+Avant de corréler l'usage du numérique aux performances académiques, il convient de dresser un état des lieux de l'accès matériel aux outils technologiques. L'analyse descriptive de la base de données PISA révèle une démocratisation de l'équipement de base. Si l’on observe l’accès aux outils numériques de base à domicile, c’est-à-dire : une connexion internet, un ordinateur pour le travail et d'applications éducatives, on constate qu'une très vaste majorité d'élèves (plus de $85\%$ en moyenne globale) dispose de ces outils à domicile. Ce niveau d'équipement primaire confirme notre postulat initial : les phénomènes de « fracture numérique » ne caractérisent plus seulement des zones géographiques privées de réseau. L'enjeu de l'inégalité se déplace de la possession de l’outil vers la capacité de l’élève à l’exploiter [@attewell2001].
 
 ```{r}
 #| label: tbl-acces-materiel
@@ -243,7 +247,7 @@ flextable(tableau_acces) %>%
 
 ## 0.3. La cartographie mondiale des usages
 
-Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique de ces outils varie d'un système éducatif à l'autre. La cartographie de l'utilisation moyenne des ressources numériques à l'école met en évidence des clivages géographiques (@fig-carte-usage). Ces disparités nationales rappellent que l'accès au numérique est avant tout le fruit de politiques éducatives, offrant ainsi un cadre très hétérogène à l'évaluation des performances.
+Bien que l'accès matériel tende à s'uniformiser, l'intégration pédagogique de ces outils varie d'un système éducatif à l'autre. La cartographie de l'utilisation moyenne des ressources numériques à l'école met en évidence des clivages géographiques (@fig-carte-usage). Ces disparités nationales rappellent que l'accès au numérique est avant tout le fruit de politiques éducatives, offrant ainsi un cadre très hétérogène à l'évaluation des performances [@escueta2020].
 
 ```{r}
 #| label: fig-carte-usage
@@ -413,7 +417,7 @@ labels_activites <- c(
 
 ```
 
-L’analyse de l’influence des technologies numériques sur la réussite scolaire impose au préalable de définir une mesure robuste de la performance elle-même. Pour ce faire, notre étude repose sur le développement d'un indicateur multidimensionnel dont la validité est éprouvée par le test de l'Alpha de Cronbach.
+L’analyse de l’influence des technologies numériques sur la réussite scolaire impose au préalable de définir une mesure robuste de la performance elle-même. Pour ce faire, notre étude repose sur le développement d'un indicateur multidimensionnel dont la validité est éprouvée par le test de l'Alpha de Cronbach [@cronbach1951].
 
 Ce test nous permet de vérifier que les résultats obtenus en mathématiques, en sciences et en lecture sont cohérents entre eux. Il garantit que ces trois matières "vont dans le même sens" et peuvent donc être réunies pour former une seule mesure globale du niveau de l'élève.
 
@@ -541,7 +545,7 @@ flextable(tab_fiabilite_2) %>%
 
 ### Analyse de la courbe
 
-L'analyse des données de l'enquête PISA met en évidence une relation en « U inversé » entre la fréquence d'utilisation des ressources numériques pédagogiques et le score moyen des élèves en mathématiques, sciences et compréhension de l'écrit. Si une utilisation modérée des outils numériques, tant à l'école qu'en dehors, semble corrélée à une amélioration des performances, un effet de saturation apparaît au-delà d'un certain seuil d'intensité. Le point d'inflexion se situe autour du niveau 4 (correspondant à une utilisation modérée) sur l'échelle de fréquence normalisée : à ce stade, les élèves obtiennent les scores les plus élevés, atteignant en moyenne près de 470 points. Passé ce seuil, on observe un décrochage significatif de la performance, le score moyen chutant sous les 430 points pour les utilisateurs les plus intensifs (niveau 8 et 9)(@fig-relation-freq-usage-perf-scolaire).
+L'analyse des données de l'enquête PISA met en évidence une relation en « U inversé » entre la fréquence d'utilisation des ressources numériques pédagogiques et le score moyen des élèves en mathématiques, sciences et compréhension de l'écrit. Si une utilisation modérée des outils numériques, tant à l'école qu'en dehors, semble corrélée à une amélioration des performances, un effet de saturation apparaît au-delà d'un certain seuil d'intensité [@escueta2020; @ocde2015]. Le point d'inflexion se situe autour du niveau 4 (correspondant à une utilisation modérée) sur l'échelle de fréquence normalisée : à ce stade, les élèves obtiennent les scores les plus élevés, atteignant en moyenne près de 470 points. Passé ce seuil, on observe un décrochage significatif de la performance, le score moyen chutant sous les 430 points pour les utilisateurs les plus intensifs (niveau 8 et 9)(@fig-relation-freq-usage-perf-scolaire).
 
 ```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 #| echo: false
@@ -731,7 +735,7 @@ ggplot(synthese_graphique, aes(x = Frequence, y = Note_Moyenne, color = Activity
   guides(color = guide_legend(ncol = 2, title.position = "top"))
 ```
 
-Malgré une différence entre les deux genres notamment lors des cas extrêmes d'utilisation, il existe un biais relatif à la fréquence d'utilisation par genre. En effet la proportion des femmes est égale à celle des hommes en cas d'utilisation "moyenne" mais dans les cas extrêmes elles sont sous représentées (@fig-prop-fille-cs-garcons-intensite-usage). Ce biais n'influence pas le message global d'une différence de l'impact des technologie sur les performances des hommes et des femmes.
+Malgré une différence entre les deux genres notamment lors des cas extrêmes d'utilisation, il existe un biais relatif à la fréquence d'utilisation par genre. En effet la proportion des femmes est égale à celle des hommes en cas d'utilisation "moyenne" mais dans les cas extrêmes elles sont sous représentées (@fig-prop-fille-vs-garcons-intensite-usage). Ce biais n'influence pas le message global d'une différence de l'impact des technologie sur les performances des hommes et des femmes.
 
 ```{r, fig.width=8, fig.height=6, out.width="80%", fig.align="center", warning=FALSE, message=FALSE}
 #| label: fig-prop-fille-vs-garcons-intensite-usage
@@ -1108,7 +1112,7 @@ On observe que le Q4 (Excellent) se positionne dans la zone négative de la Dime
 
 Si l’Analyse des Correspondances Multiples (ACM) nous a permis de cartographier l’espace des possibles numériques, elle ne suffit pas à isoler des groupes d’individus concrets. Pour passer de la « géographie des variables » à une véritable « sociologie des élèves », nous avons mobilisé un algorithme de partitionnement non supervisé : les **K-means**. En appliquant cet algorithme sur les coordonnées factorielles des individus, nous avons segmenté la population en trois clusters homogènes. Cette approche permet de stabiliser des « portraits-robots » d’élèves partageant des structures d'usage similaires. L'objectif est ici de vérifier si ces comportements, identifiés de manière purement statistique, recoupent les trajectoires de performance académique que nous avons projetées en variables illustratives (quartiles de score PISA).
 
-La détermination du nombre optimal de clusters ($k$) repose en premier lieu sur la méthode du coude pour identifier un point d'inflexion où l'ajout d'un cluster supplémentaire ne réduit plus la variance de manière significative. Dans notre étude, ce point apparaît dès $k=3$(@fig-diagnostic-kmeans) , signalant qu'une partition en trois groupes constitue le compromis idéal entre précision statistique et simplicité du modèle.
+La détermination du nombre optimal de clusters ($k$) repose en premier lieu sur la méthode du coude pour identifier un point d'inflexion où l'ajout d'un cluster supplémentaire ne réduit plus la variance de manière significative. Dans notre étude, ce point apparaît dès $k=3$ (@fig-diagnostic-kmeans), signalant qu'une partition en trois groupes constitue le compromis idéal entre précision statistique et simplicité du modèle.
 
 ```{r}
 #| label: fig-diagnostic-kmeans
@@ -1127,8 +1131,6 @@ fviz_nbclust(ind_coords, kmeans, method = "wss") +
 En complément, la méthode de la silhouette permet d'évaluer la qualité de la segmentation en mesurant la distance entre chaque individu et les autres membres de son cluster par rapport aux clusters voisins. Sur le graphique, le score le plus élevé indique mathématiquement le $k$ optimal pour lequel les individus sont les mieux assignés à leur groupe. Si ce coefficient suggère ici une segmentation très fines (@fig-diagnostic-kmeans-1) , nous avons privilégié interprétabilité sociologique en retenant la partition à 3 clusters. Ce choix permet une symétrie parfaite avec notre typologie d'intensité d'usage (Faible, Modéré, Intensif) tout en capturant l'essentiel de l'hétérogénéité des comportements numériques.
 
 ```{r}
-# 2. Graphique de la Silhouette
-# On cherche le pic (la valeur la plus haute)
 #| label: fig-diagnostic-kmeans-1
 #| fig-cap: Méthode de la silhouette(détermination du nombre de classes)
 set.seed(43)
@@ -1300,15 +1302,8 @@ Enfin, la vulnérabilité face à ce point de bascule est fortement modulée par
 
 # Références
 
-Attewell, P. 2001. « The First and Second Digital Divides ». Sociology of Education.
-
-Escueta, M. et al. 2020. « Upgrading Education with Technology ». Journal of Economic Literature.
-
-Bernigole, V., Fernandez, A., & Salles, F. (2022). PISA 2022 : Analyse de questions de culture mathématique.
-
-OCDE. 2015. Connectés pour apprendre : les élèves et la technologie. Organisation de coopéra tion et de développement économiques.
-
-Cronbach, L. J. (1951). Coefficient alpha and the internal structure of tests. Psychometrika
+::: {#refs}
+:::
 
 # Annexe
 
